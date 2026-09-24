@@ -1,3162 +1,2648 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SIFTRA — Understand Everything</title>
-<!-- Vercel Web Analytics -->
-<script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
-
-
-<!-- Required libraries: load BEFORE the SIFTRA application -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<style>
-*{box-sizing:border-box}
-body{
-margin:0;
-background:#f7f7f9;
-color:#18181b;
-font:15px Arial,sans-serif
-}
-button,input,textarea,select{font:inherit}
-button{cursor:pointer}
-.hide{display:none!important}
-.wrap{max-width:1050px;margin:auto;padding:0 18px}
-
-header{
-height:64px;
-background:#fff;
-border-bottom:1px solid #e5e5e8;
-display:flex;
-align-items:center
-}
-.head{
-display:flex;
-align-items:center;
-justify-content:space-between
-}
-.brand{
-font-size:20px;
-font-weight:700;
-display:flex;
-align-items:center;
-gap:9px
-}
-.logo{
-width:34px;
-height:34px;
-border-radius:10px;
-background:#5757d6;
-color:#fff;
-display:grid;
-place-items:center
-}
-nav{display:flex;gap:3px}
-nav button,.ghost{
-background:transparent;
-border:0;
-padding:9px 12px;
-border-radius:8px
-}
-nav button:hover,.ghost:hover{background:#eeeef2}
-
-.hero{
-text-align:center;
-padding:78px 18px 70px
-}
-.badge{
-display:inline-block;
-background:#ededff;
-color:#5555c8;
-padding:7px 11px;
-border-radius:20px;
-font-size:11px;
-font-weight:bold
-}
-.hero h1{
-font-size:clamp(42px,7vw,70px);
-line-height:.98;
-letter-spacing:-3px;
-margin:20px 0
-}
-.hero h1 span{color:#5959d5}
-.hero p{
-max-width:620px;
-margin:0 auto 25px;
-color:#71717a;
-line-height:1.6
-}
-
-.primary{
-border:0;
-background:#5858d3;
-color:#fff;
-padding:11px 17px;
-border-radius:9px;
-font-weight:700
-}
-.primary:hover{background:#4545bc}
-.primary:disabled{opacity:.55;cursor:not-allowed}
-
-.features{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:14px;
-padding-bottom:70px
-}
-.feature,.box,.result,.history{
-background:#fff;
-border:1px solid #e4e4e8;
-border-radius:14px
-}
-.feature{padding:20px}
-.feature p,.page>p{
-color:#71717a;
-line-height:1.5
-}
-
-.page{padding:32px 0 70px}
-
-.box{overflow:hidden}
-
-.tabs{
-display:flex;
-gap:4px;
-padding:8px;
-border-bottom:1px solid #e5e5e8;
-overflow:auto
-}
-.tab{
-border:0;
-background:transparent;
-padding:10px 13px;
-border-radius:8px;
-white-space:nowrap;
-color:#71717a;
-font-weight:700
-}
-.tab:hover{background:#f1f1f4}
-.tab.active{
-background:#ededff;
-color:#5555c8
-}
-
-.workspace{padding:20px}
-.workspace h3{margin:0 0 7px}
-.workspace p{
-color:#71717a;
-font-size:14px;
-line-height:1.5
-}
-
-textarea{
-width:100%;
-min-height:270px;
-border:1px solid #dcdce2;
-border-radius:11px;
-padding:14px;
-resize:vertical;
-outline:0;
-background:#fdfdfd;
-color:#18181b
-}
-textarea:focus,input:focus,select:focus{
-border-color:#5b5bd5;
-outline:0
-}
-
-.count{
-display:flex;
-justify-content:space-between;
-color:#888;
-font-size:12px;
-margin-top:7px
-}
-
-.upload{
-min-height:250px;
-border:2px dashed #d5d5dc;
-border-radius:13px;
-display:grid;
-place-items:center;
-text-align:center;
-padding:20px;
-transition:.15s
-}
-.upload.drag{
-border-color:#5959d5;
-background:#f1f1ff
-}
-.upload .icon{
-font-size:30px;
-color:#5a5ad4;
-margin-bottom:8px
-}
-.file{display:none}
-
-.info{
-margin-top:10px;
-background:#f0f0f4;
-border-radius:8px;
-padding:9px;
-font-size:12px;
-line-height:1.5
-}
-
-.preview{
-display:block;
-max-width:100%;
-max-height:220px;
-margin:12px auto 0;
-border-radius:10px;
-border:1px solid #ddd
-}
-
-.options{
-border-top:1px solid #e5e5e8;
-background:#fafafd
-}
-.option{padding:14px 20px}
-.option label{
-display:block;
-color:#71717a;
-font-size:12px;
-font-weight:bold;
-margin-bottom:6px
-}
-
-select,input{
-width:100%;
-border:1px solid #dcdce2;
-border-radius:9px;
-background:#fff;
-padding:10px;
-color:#18181b
-}
-
-.actions{
-border-top:1px solid #e5e5e8;
-padding:14px 20px;
-display:flex;
-justify-content:flex-end;
-gap:7px
-}
-
-.progress{
-border-top:1px solid #e5e5e8;
-padding:12px 20px
-}
-.progressline{
-height:6px;
-background:#e5e5e8;
-border-radius:20px;
-overflow:hidden
-}
-.fill{
-height:100%;
-width:0;
-background:#5a5ad4;
-transition:.2s
-}
-.pt{
-display:flex;
-justify-content:space-between;
-font-size:12px;
-color:#777;
-margin-bottom:6px
-}
-
-.result{
-margin-top:16px;
-overflow:hidden
-}
-.rhead{
-padding:14px 18px;
-border-bottom:1px solid #e5e5e8;
-display:flex;
-justify-content:space-between;
-gap:10px;
-align-items:center
-}
-.rhead h3{margin:0}
-.rbody{padding:18px}
-
-.stats{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:9px;
-margin-bottom:18px
-}
-.stat{
-background:#f3f3f6;
-padding:11px;
-border-radius:9px
-}
-.stat small{
-display:block;
-color:#777;
-margin-bottom:5px
-}
-
-.summary{
-line-height:1.75;
-white-space:pre-wrap
-}
-
-.cols{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-margin-top:18px
-}
-.card{
-border:1px solid #e4e4e8;
-border-radius:11px;
-padding:14px
-}
-.card h4{margin-top:0}
-.card li{
-line-height:1.5;
-margin-bottom:8px
-}
-
-.keys{
-display:flex;
-gap:6px;
-flex-wrap:wrap
-}
-.key{
-background:#ededff;
-color:#5555c8;
-padding:6px 8px;
-border-radius:6px;
-font-size:12px
-}
-
-.search{
-display:flex;
-gap:7px;
-margin-top:18px
-}
-.search input{flex:1}
-.searchout{
-margin-top:7px;
-background:#f3f3f6;
-padding:11px;
-border-radius:8px;
-line-height:1.5
-}
-
-.historylist{
-display:grid;
-gap:9px;
-margin-top:15px
-}
-.history{
-padding:14px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:10px
-}
-.meta{
-font-size:12px;
-color:#777;
-margin-top:4px
-}
-.empty{
-text-align:center;
-padding:45px;
-color:#777;
-border:1px dashed #d5d5da;
-border-radius:12px
-}
-
-.media-note{
-margin-top:12px;
-padding:12px;
-background:#f3f3f6;
-border-radius:9px;
-font-size:13px;
-color:#666
-}
-
-footer{
-text-align:center;
-border-top:1px solid #e5e5e8;
-padding:25px;
-color:#777;
-font-size:13px
-}
-
-.toast{
-position:fixed;
-right:18px;
-bottom:18px;
-background:#202027;
-color:#fff;
-padding:11px 14px;
-border-radius:9px;
-opacity:0;
-transform:translateY(8px);
-transition:.2s;
-z-index:100
-}
-.toast.show{
-opacity:1;
-transform:translateY(0)
-}
-
-@media(max-width:700px){
-.features,.cols,.stats{
-grid-template-columns:1fr
-}
-.rhead,.history{
-align-items:flex-start;
-flex-direction:column
-}
-nav button{
-padding:8px
-}
-.hero{
-padding-top:55px
-}
-.hero h1{
-letter-spacing:-2px
-}
-.actions{
-justify-content:stretch
-}
-.actions button{
-flex:1
-}
-.search{
-flex-direction:column
-}
-}
-</style>
-</head>
-
-<body>
-
-<header>
-<div class="wrap head">
-<div class="brand">
-<div class="logo">S</div>
-SIFTRA
-</div>
-
-<nav>
-<button id="homeNav" type="button">Home</button>
-<button id="sumNav" type="button">Summarize</button>
-<button id="historyNav" type="button">History</button>
-</nav>
-</div>
-</header>
-
-<!-- HOME -->
-<section id="home">
-
-<div class="wrap hero">
-
-<span class="badge">
-UPLOAD ANYTHING. UNDERSTAND EVERYTHING.
-</span>
-
-<h1>
-Don't Read It All.<br>
-<span>Just Get It.</span>
-</h1>
-
-<p>
-Turn your text, documents and images into clear summaries,
-useful key points and searchable information directly in your browser.
-</p>
-
-<button class="primary" id="start" type="button">
-Start Summarizing
-</button>
-
-</div>
-
-<div class="wrap features">
-
-<div class="feature">
-<b>Fast</b>
-<p>
-Process text and supported documents directly in your browser.
-</p>
-</div>
-
-<div class="feature">
-<b>Multiple Formats</b>
-<p>
-Work with text, PDF, images, audio and video files.
-</p>
-</div>
-
-<div class="feature">
-<b>Private by Design</b>
-<p>
-Your saved SIFTRA history stays in this browser.
-</p>
-</div>
-
-</div>
-
-</section>
-
-
-<!-- APPLICATION -->
-<section id="app" class="page hide">
-
-<div class="wrap">
-
-<h2>Summarize</h2>
-
-<p>
-Choose a workspace. Each format keeps its own content and result.
-</p>
-
-<div class="box">
-
-<!-- TABS -->
-<div class="tabs">
-
-<button class="tab active" data-tab="text" type="button">
-Text
-</button>
-
-<button class="tab" data-tab="pdf" type="button">
-PDF
-</button>
-
-<button class="tab" data-tab="image" type="button">
-Image
-</button>
-
-<button class="tab" data-tab="audio" type="button">
-Audio
-</button>
-
-<button class="tab" data-tab="video" type="button">
-Video
-</button>
-
-</div>
-
-
-<!-- TEXT -->
-<div class="workspace panel" data-type="text">
-
-<h3>Text</h3>
-
-<p>
-Paste or type the content you want SIFTRA to summarize.
-</p>
-
-<textarea
-id="textInput"
-placeholder="Paste your text here..."
-></textarea>
-
-<div class="count">
-<span id="wordCount">0 words</span>
-<span>Ready</span>
-</div>
-
-</div>
-
-
-<!-- PDF -->
-<div class="workspace panel hide" data-type="pdf">
-
-<h3>PDF</h3>
-
-<p>
-Upload a PDF and SIFTRA will extract its selectable text.
-</p>
-
-<div
-class="upload"
-id="pdfDrop"
->
-
-<div>
-
-<div class="icon">▣</div>
-
-<b>Upload PDF</b>
-
-<p>
-Choose a PDF or drag it here.
-</p>
-
-<input
-id="pdfFile"
-class="file"
-type="file"
-accept=".pdf,application/pdf"
->
-
-<button
-class="primary"
-id="pdfButton"
-type="button"
->
-Choose PDF
-</button>
-
-<div id="pdfInfo" class="info hide"></div>
-
-</div>
-
-</div>
-
-</div>
-
-
-<!-- IMAGE -->
-<div class="workspace panel hide" data-type="image">
-
-<h3>Image</h3>
-
-<p>
-Extract readable text from an image using OCR.
-</p>
-
-<div
-class="upload"
-id="imageDrop"
->
-
-<div>
-
-<div class="icon">▧</div>
-
-<b>Upload Image</b>
-
-<p>
-JPG, PNG and other supported image files.
-</p>
-
-<input
-id="imageFile"
-class="file"
-type="file"
-accept="image/*"
->
-
-<button
-class="primary"
-id="imageButton"
-type="button"
->
-Choose Image
-</button>
-
-<img
-id="imagePreview"
-class="preview hide"
-alt="Selected image preview"
->
-
-<div id="imageInfo" class="info hide"></div>
-
-</div>
-
-</div>
-
-</div>
-
-
-<!-- AUDIO -->
-<div class="workspace panel hide" data-type="audio">
-
-<h3>Audio</h3>
-
-<p>
-Select an audio file. A transcript is required before SIFTRA can summarize the spoken content.
-</p>
-
-<div
-class="upload"
-id="audioDrop"
->
-
-<div>
-
-<div class="icon">◉</div>
-
-<b>Choose Audio</b>
-
-<p>
-Select or drag an audio file here.
-</p>
-
-<input
-id="audioFile"
-class="file"
-type="file"
-accept="audio/*"
->
-
-<button
-class="primary"
-id="audioButton"
-type="button"
->
-Choose Audio
-</button>
-
-<div id="audioInfo" class="info hide"></div>
-
-</div>
-
-</div>
-
-<div class="media-note">
-Browser-only SIFTRA does not pretend to transcribe an audio file when no transcription engine is available. Paste the transcript below to summarize it.
-</div>
-
-<textarea
-id="audioTranscript"
-placeholder="Paste the audio transcript here..."
-style="margin-top:12px;min-height:180px"
-></textarea>
-
-</div>
-
-
-<!-- VIDEO -->
-<div class="workspace panel hide" data-type="video">
-
-<h3>Video</h3>
-
-<p>
-Select a video file. A transcript is required before SIFTRA can summarize the spoken content.
-</p>
-
-<div
-class="upload"
-id="videoDrop"
->
-
-<div>
-
-<div class="icon">▶️</div>
-
-<b>Choose Video</b>
-
-<p>
-Select or drag a video file here.
-</p>
-
-<input
-id="videoFile"
-class="file"
-type="file"
-accept="video/*"
->
-
-<button
-class="primary"
-id="videoButton"
-type="button"
->
-Choose Video
-</button>
-
-<div id="videoInfo" class="info hide"></div>
-
-</div>
-
-</div>
-
-<div class="media-note">
-Browser-only SIFTRA does not generate a fake transcript. Paste the video transcript below to summarize the spoken content.
-</div>
-
-<textarea
-id="videoTranscript"
-placeholder="Paste the video transcript here..."
-style="margin-top:12px;min-height:180px"
-></textarea>
-
-</div>
-
-
-<!-- SUMMARY STYLE -->
-<div class="options">
-
-<div class="option">
-
-<label>SUMMARY STYLE</label>
-
-<select id="style">
-
-<option value="short">
-Short Summary
-</option>
-
-<option value="paragraph">
-One Paragraph
-</option>
-
-<option value="bullets">
-Bullet Points
-</option>
-
-<option value="takeaways">
-Key Takeaways
-</option>
-
-</select>
-
-</div>
-
-</div>
-
-
-<!-- PROGRESS -->
-<div id="progress" class="progress hide">
-
-<div class="pt">
-
-<span id="progressText">
-Processing...
-</span>
-
-<span id="progressNumber">
-0%
-</span>
-
-</div>
-
-<div class="progressline">
-<div id="fill" class="fill"></div>
-</div>
-
-</div>
-
-
-<!-- ACTIONS -->
-<div class="actions">
-
-<button
-class="ghost"
-id="clear"
-type="button"
->
-Clear
-</button>
-
-<button
-class="primary"
-id="summarize"
-type="button"
->
-Summarize
-</button>
-
-</div>
-
-</div>
-
-
-<!-- RESULT -->
-<div id="result" class="result hide">
-
-<div class="rhead">
-
-<h3 id="resultTitle">
-Summary
-</h3>
-
-<div>
-
-<button
-class="ghost"
-id="copy"
-type="button"
->
-Copy
-</button>
-
-<button
-class="ghost"
-id="downloadTxt"
-type="button"
->
-TXT
-</button>
-
-<button
-class="ghost"
-id="downloadPdf"
-type="button"
->
-PDF
-</button>
-
-</div>
-
-</div>
-
-
-<div class="rbody">
-
-<div class="stats">
-
-<div class="stat">
-<small>Original</small>
-<b id="originalStat">0 words</b>
-</div>
-
-<div class="stat">
-<small>Summary</small>
-<b id="summaryStat">0 words</b>
-</div>
-
-<div class="stat">
-<small>Workspace</small>
-<b id="sourceStat">TEXT</b>
-</div>
-
-</div>
-
-
-<div
-id="summaryOutput"
-class="summary"
-></div>
-
-
-<div class="cols">
-
-<div class="card">
-
-<h4>Key Points</h4>
-
-<ul id="points"></ul>
-
-</div>
-
-
-<div class="card">
-
-<h4>Keywords</h4>
-
-<div
-id="keywords"
-class="keys"
-></div>
-
-</div>
-
-</div>
-
-
-<div class="search">
-
-<input
-id="searchInput"
-placeholder="Search the original content"
->
-
-<button
-class="ghost"
-id="searchButton"
-type="button"
->
-Search
-</button>
-
-</div>
-
-<div
-id="searchOutput"
-class="searchout hide"
-></div>
-
-</div>
-
-</div>
-
-</div>
-</div>
-
-</section>
-
-
-<!-- HISTORY -->
-<section id="history" class="page hide">
-
-<div class="wrap">
-
-<h2>History</h2>
-
-<p>
-Saved summaries are stored locally in this browser.
-</p>
-
-<div>
-
-<button
-class="ghost"
-id="exportHistory"
-type="button"
->
-Export
-</button>
-
-<button
-class="ghost"
-id="clearHistory"
-type="button"
->
-Clear History
-</button>
-
-</div>
-
-<input
-id="historySearch"
-style="margin-top:15px"
-placeholder="Search saved summaries..."
->
-
-<div
-id="historyList"
-class="historylist"
-></div>
-
-</div>
-
-</section>
-
-
-<footer>
-SIFTRA — Upload Anything. Understand Everything. In Seconds.
-</footer>
-
-<div id="toast" class="toast"></div>
-
-
-<script>
-
-/* =========================================================
-   SIFTRA APPLICATION
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="SIFTRA — Upload Anything. Understand Everything."
+    />
+    <title>SIFTRA — Upload Anything. Understand Everything.</title>
+
+    <!-- External libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+      :root {
+        --bg: #f7f8fc;
+        --surface: #ffffff;
+        --surface-2: #f1f2f7;
+        --text: #151522;
+        --muted: #6f7180;
+        --line: #e6e7ee;
+        --brand: #5b5bd6;
+        --brand-dark: #4747b8;
+        --brand-soft: #ececff;
+        --success: #16835b;
+        --danger: #c83d4f;
+        --shadow: 0 18px 55px rgba(24, 24, 45, 0.08);
+        --radius: 22px;
+        --max: 1180px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+      }
+      button,
+      input,
+      textarea,
+      select {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .hide {
+        display: none !important;
+      }
+      .container {
+        width: min(var(--max), calc(100% - 36px));
+        margin: auto;
+      }
+
+      /* ---------- GLOBAL ---------- */
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: rgba(247, 248, 252, 0.9);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid rgba(230, 231, 238, 0.85);
+      }
+      .nav {
+        min-height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        font-size: 21px;
+      }
+      .logo-mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: var(--brand);
+        color: white;
+        font-weight: 900;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .nav-links a,
+      .nav-links button {
+        border: 0;
+        background: transparent;
+        padding: 9px 12px;
+        border-radius: 10px;
+        color: #4e5060;
+        font-weight: 650;
+      }
+      .nav-links a:hover,
+      .nav-links button:hover {
+        background: var(--surface-2);
+        color: var(--text);
+      }
+      .nav-cta {
+        background: var(--brand) !important;
+        color: #fff !important;
+      }
+      .nav-cta:hover {
+        background: var(--brand-dark) !important;
+      }
+      .mobile-menu {
+        display: none;
+        border: 1px solid var(--line);
+        background: white;
+        border-radius: 10px;
+        padding: 9px 11px;
+      }
+      .section {
+        padding: 92px 0;
+      }
+      .section-head {
+        max-width: 700px;
+        margin: 0 auto 45px;
+        text-align: center;
+      }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--brand-soft);
+        color: var(--brand-dark);
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 800;
+      }
+      .section-head h2 {
+        margin: 14px 0 12px;
+        font-size: clamp(30px, 5vw, 48px);
+        line-height: 1.08;
+        letter-spacing: -0.045em;
+      }
+      .section-head p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 17px;
+      }
+
+      /* ---------- LANDING ---------- */
+      .hero {
+        padding: 90px 0 75px;
+        overflow: hidden;
+      }
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.08fr 0.92fr;
+        gap: 55px;
+        align-items: center;
+      }
+      .hero h1 {
+        margin: 18px 0;
+        max-width: 760px;
+        font-size: clamp(48px, 7vw, 78px);
+        line-height: 0.98;
+        letter-spacing: -0.065em;
+      }
+      .hero h1 span {
+        color: var(--brand);
+      }
+      .hero p {
+        max-width: 650px;
+        color: var(--muted);
+        font-size: 19px;
+      }
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+      }
+      .btn {
+        border: 1px solid var(--line);
+        background: white;
+        color: var(--text);
+        padding: 13px 18px;
+        border-radius: 12px;
+        font-weight: 800;
+        transition: 0.2s;
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 22px rgba(20, 20, 40, 0.08);
+      }
+      .btn-primary {
+        background: var(--brand);
+        color: white;
+        border-color: var(--brand);
+      }
+      .btn-primary:hover {
+        background: var(--brand-dark);
+      }
+      .btn-large {
+        padding: 15px 21px;
+      }
+      .hero-note {
+        margin-top: 18px !important;
+        font-size: 13px !important;
+      }
+      .hero-visual {
+        min-height: 430px;
+        border: 1px solid var(--line);
+        border-radius: 30px;
+        background: linear-gradient(145deg, #fff, #f0f0ff);
+        box-shadow: var(--shadow);
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-visual:before {
+        content: "";
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        background: #dedfff;
+        right: -100px;
+        top: -90px;
+      }
+      .mock-window {
+        position: relative;
+        z-index: 1;
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 19px;
+        box-shadow: 0 16px 40px rgba(30, 30, 60, 0.1);
+        overflow: hidden;
+      }
+      .mock-head {
+        height: 52px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 0 16px;
+      }
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #d8d9e1;
+      }
+      .mock-body {
+        padding: 20px;
+      }
+      .mock-upload {
+        border: 2px dashed #d5d6e5;
+        border-radius: 16px;
+        padding: 32px;
+        text-align: center;
+      }
+      .mock-icon {
+        width: 52px;
+        height: 52px;
+        margin: auto;
+        border-radius: 15px;
+        display: grid;
+        place-items: center;
+        background: var(--brand-soft);
+        color: var(--brand);
+        font-size: 23px;
+        font-weight: 900;
+      }
+      .mock-lines {
+        display: grid;
+        gap: 9px;
+        margin-top: 25px;
+      }
+      .mock-line {
+        height: 10px;
+        border-radius: 99px;
+        background: #ededf4;
+      }
+      .mock-line:nth-child(2) {
+        width: 78%;
+      }
+      .mock-line:nth-child(3) {
+        width: 55%;
+      }
+      .trust-row {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-top: 30px;
+        color: #7a7b88;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      /* ---------- FEATURES ---------- */
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 25px;
+        box-shadow: 0 8px 28px rgba(25, 25, 50, 0.035);
+      }
+      .icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: var(--brand-soft);
+        color: var(--brand);
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+        font-size: 18px;
+      }
+      .card h3 {
+        margin: 18px 0 8px;
+        font-size: 19px;
+      }
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      /* ---------- HOW IT WORKS ---------- */
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+      }
+      .step {
+        position: relative;
+        padding: 24px;
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+      }
+      .step-num {
+        font-size: 13px;
+        font-weight: 900;
+        color: var(--brand);
+      }
+      .step h3 {
+        margin: 15px 0 7px;
+      }
+      .step p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      /* ---------- SPLIT SECTION ---------- */
+      .split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 45px;
+        align-items: center;
+      }
+      .split-copy h2 {
+        font-size: clamp(32px, 4vw, 50px);
+        line-height: 1.05;
+        letter-spacing: -0.045em;
+        margin: 14px 0;
+      }
+      .split-copy p {
+        color: var(--muted);
+        font-size: 17px;
+      }
+      .checks {
+        display: grid;
+        gap: 12px;
+        margin-top: 22px;
+      }
+      .check {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      .check-badge {
+        width: 23px;
+        height: 23px;
+        flex: none;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: #e8f7f0;
+        color: var(--success);
+        font-size: 12px;
+        font-weight: 900;
+      }
+      .panel {
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        padding: 26px;
+        box-shadow: var(--shadow);
+      }
+      .panel-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 17px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .panel-row:last-child {
+        border-bottom: 0;
+      }
+      .status {
+        font-size: 12px;
+        font-weight: 800;
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: #eaf8f2;
+        color: var(--success);
+      }
+
+      /* ---------- FAQ ---------- */
+      .faq {
+        max-width: 800px;
+        margin: auto;
+      }
+      .faq-item {
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        margin-bottom: 10px;
+        overflow: hidden;
+      }
+      .faq-q {
+        width: 100%;
+        padding: 18px 20px;
+        border: 0;
+        background: white;
+        text-align: left;
+        font-weight: 800;
+        display: flex;
+        justify-content: space-between;
+      }
+      .faq-a {
+        padding: 0 20px 18px;
+        color: var(--muted);
+        display: none;
+      }
+      .faq-item.open .faq-a {
+        display: block;
+      }
+
+      /* ---------- CTA ---------- */
+      .cta {
+        background: #161622;
+        color: white;
+        border-radius: 30px;
+        padding: 55px;
+        display: flex;
+        justify-content: space-between;
+        gap: 30px;
+        align-items: center;
+      }
+      .cta h2 {
+        font-size: clamp(30px, 4vw, 48px);
+        line-height: 1.05;
+        margin: 0 0 10px;
+        letter-spacing: -0.04em;
+      }
+      .cta p {
+        color: #b8b8c7;
+        margin: 0;
+        max-width: 650px;
+      }
+      .cta .btn {
+        background: white;
+        border-color: white;
+      }
+
+      /* ---------- FOOTER ---------- */
+      footer {
+        padding: 55px 0 30px;
+        border-top: 1px solid var(--line);
+        background: white;
+      }
+      .footer-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr 1fr 1fr;
+        gap: 30px;
+      }
+      .footer-title {
+        font-weight: 900;
+        margin-bottom: 13px;
+      }
+      .footer-col a {
+        display: block;
+        color: var(--muted);
+        margin: 8px 0;
+        font-size: 14px;
+      }
+      .footer-bottom {
+        border-top: 1px solid var(--line);
+        margin-top: 35px;
+        padding-top: 22px;
+        color: var(--muted);
+        font-size: 13px;
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+      }
+
+      /* ---------- AUTH ---------- */
+      .auth-page {
+        min-height: calc(100vh - 73px);
+        display: grid;
+        place-items: center;
+        padding: 55px 18px;
+        background: var(--bg);
+      }
+      .auth-card {
+        width: min(460px, 100%);
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 25px;
+        padding: 34px;
+        box-shadow: var(--shadow);
+      }
+      .auth-top {
+        text-align: center;
+      }
+      .auth-logo {
+        width: 58px;
+        height: 58px;
+        margin: 0 auto 18px;
+        border-radius: 17px;
+        display: grid;
+        place-items: center;
+        background: var(--brand);
+        color: white;
+        font-size: 25px;
+        font-weight: 900;
+      }
+      .auth-card h2 {
+        margin: 0 0 7px;
+        font-size: 29px;
+        letter-spacing: -0.03em;
+      }
+      .auth-subtitle {
+        margin: 0 0 25px;
+        color: var(--muted);
+      }
+      .auth-input {
+        width: 100%;
+        padding: 13px 14px;
+        margin-bottom: 12px;
+        border: 1px solid #dfe0e8;
+        border-radius: 11px;
+        outline: none;
+        background: white;
+      }
+      .auth-input:focus {
+        border-color: var(--brand);
+        box-shadow: 0 0 0 3px rgba(91, 91, 214, 0.1);
+      }
+      .auth-submit {
+        width: 100%;
+        margin-top: 4px;
+      }
+      .google {
+        width: 100%;
+        margin-top: 12px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        background: white;
+        border-radius: 11px;
+        font-weight: 800;
+      }
+      .google:hover {
+        background: #f7f7fa;
+      }
+      .auth-link {
+        display: block;
+        margin: 15px auto 0;
+        border: 0;
+        background: none;
+        color: var(--brand);
+        font-weight: 700;
+        font-size: 14px;
+      }
+      .auth-message {
+        min-height: 22px;
+        text-align: center;
+        margin: 17px 0 0;
+        font-size: 14px;
+      }
+      .auth-back {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      /* ---------- APP ---------- */
+      .app-shell {
+        min-height: calc(100vh - 73px);
+      }
+      .app-header {
+        background: white;
+        border-bottom: 1px solid var(--line);
+        padding: 24px 0;
+      }
+      .app-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+      .app-title h1 {
+        margin: 0;
+        font-size: 30px;
+        letter-spacing: -0.04em;
+      }
+      .app-title p {
+        margin: 4px 0 0;
+        color: var(--muted);
+      }
+      .user-chip {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--brand-soft);
+        color: var(--brand);
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+      }
+      .app-nav {
+        background: white;
+        border-bottom: 1px solid var(--line);
+      }
+      .app-tabs {
+        display: flex;
+        gap: 4px;
+        overflow: auto;
+      }
+      .app-tab {
+        padding: 14px 15px;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        background: transparent;
+        color: var(--muted);
+        font-weight: 800;
+        white-space: nowrap;
+      }
+      .app-tab.active {
+        color: var(--brand);
+        border-bottom-color: var(--brand);
+      }
+      .app-main {
+        padding: 30px 0 70px;
+      }
+      .workspace {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .workspace-card {
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 22px;
+      }
+      .workspace-card.full {
+        grid-column: 1/-1;
+      }
+      .workspace-card h2 {
+        margin: 0 0 5px;
+        font-size: 20px;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      textarea {
+        width: 100%;
+        min-height: 260px;
+        resize: vertical;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 15px;
+        outline: none;
+        background: #fbfbfd;
+      }
+      textarea:focus {
+        border-color: var(--brand);
+        box-shadow: 0 0 0 3px rgba(91, 91, 214, 0.08);
+      }
+      .input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        outline: none;
+        background: white;
+      }
+      .input:focus {
+        border-color: var(--brand);
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 13px;
+      }
+      .select {
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: white;
+      }
+      .dropzone {
+        border: 2px dashed #d7d8e4;
+        border-radius: 16px;
+        padding: 28px;
+        text-align: center;
+        transition: 0.2s;
+        background: #fcfcfe;
+      }
+      .dropzone.drag {
+        border-color: var(--brand);
+        background: var(--brand-soft);
+      }
+      .dropzone strong {
+        display: block;
+        font-size: 16px;
+      }
+      .dropzone span {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .output {
+        min-height: 260px;
+        background: #fbfbfd;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 17px;
+        white-space: pre-wrap;
+      }
+      .output h3 {
+        margin-top: 0;
+      }
+      .pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 10px;
+      }
+      .pill {
+        padding: 6px 9px;
+        background: var(--brand-soft);
+        color: var(--brand-dark);
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .history-list {
+        display: grid;
+        gap: 12px;
+      }
+      .history-item {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 17px;
+        background: white;
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        align-items: center;
+      }
+      .history-item h3 {
+        margin: 0;
+        font-size: 16px;
+      }
+      .history-item p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .history-actions {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+      }
+      .small-btn {
+        padding: 8px 11px;
+        border: 1px solid var(--line);
+        background: white;
+        border-radius: 9px;
+        font-weight: 700;
+      }
+      .small-btn.danger {
+        color: var(--danger);
+      }
+      .profile-box {
+        max-width: 650px;
+      }
+      .profile-row {
+        padding: 15px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .profile-row:last-child {
+        border-bottom: 0;
+      }
+      .empty {
+        text-align: center;
+        padding: 40px;
+        color: var(--muted);
+        border: 1px dashed var(--line);
+        border-radius: 16px;
+      }
+      .loading {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.78);
+        backdrop-filter: blur(6px);
+        z-index: 100;
+        display: grid;
+        place-items: center;
+      }
+      .loading-box {
+        background: white;
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+        padding: 25px 30px;
+        border-radius: 18px;
+        text-align: center;
+      }
+      .spinner {
+        width: 28px;
+        height: 28px;
+        border: 3px solid #ddd;
+        border-top-color: var(--brand);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 12px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .toast {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 120;
+        background: #171720;
+        color: white;
+        padding: 12px 15px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        max-width: 340px;
+        font-size: 14px;
+      }
+      .file-name {
+        font-weight: 800;
+        margin-top: 10px;
+      }
+
+      /* ---------- RESPONSIVE ---------- */
+      @media (max-width: 900px) {
+        .hero-grid,
+        .split,
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+        .cards {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .steps {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .footer-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .hero-visual {
+          min-height: 350px;
+        }
+      }
+      @media (max-width: 680px) {
+        .container {
+          width: min(var(--max), calc(100% - 26px));
+        }
+        .section {
+          padding: 68px 0;
+        }
+        .nav-links {
+          display: none;
+        }
+        .nav-links.mobile-open {
+          display: flex;
+          position: absolute;
+          top: 72px;
+          left: 0;
+          right: 0;
+          flex-direction: column;
+          align-items: stretch;
+          background: white;
+          padding: 14px;
+          border-bottom: 1px solid var(--line);
+          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.07);
+        }
+        .mobile-menu {
+          display: block;
+        }
+        .hero {
+          padding-top: 65px;
+        }
+        .hero h1 {
+          font-size: 51px;
+        }
+        .cards,
+        .steps,
+        .footer-grid {
+          grid-template-columns: 1fr;
+        }
+        .cta {
+          padding: 34px 25px;
+          display: block;
+        }
+        .cta .btn {
+          margin-top: 22px;
+        }
+        .footer-bottom {
+          display: block;
+        }
+        .footer-bottom span {
+          display: block;
+          margin-top: 5px;
+        }
+        .app-header-row {
+          align-items: flex-start;
+        }
+        .user-chip {
+          display: none;
+        }
+        .history-item {
+          display: block;
+        }
+        .history-actions {
+          margin-top: 12px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- ================= PUBLIC WEBSITE ================= -->
+
+    <div id="publicSite">
+      <header class="topbar">
+        <div class="container nav">
+          <a href="#home" class="logo">
+            <span class="logo-mark">S</span>
+            <span>SIFTRA</span>
+          </a>
+
+          <button
+            id="mobileMenu"
+            class="mobile-menu"
+            type="button"
+            aria-label="Open menu"
+          >
+            ☰
+          </button>
+
+          <nav id="publicNav" class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#how">How it works</a>
+            <a href="#security">Security</a>
+            <a href="#faq">FAQ</a>
+            <button id="navSignIn" type="button">Sign In</button>
+            <button id="navGetStarted" class="nav-cta" type="button">
+              Get Started
+            </button>
+          </nav>
+        </div>
+      </header>
+
+      <main id="landingPage">
+        <section id="home" class="hero">
+          <div class="container hero-grid">
+            <div>
+              <span class="eyebrow">✦ Smart document understanding</span>
+              <h1>Upload anything.<br /><span>Understand everything.</span></h1>
+              <p>
+                SIFTRA turns documents, images and text into clear summaries,
+                key points and useful insights — without making you dig through
+                pages of information.
+              </p>
+
+              <div class="hero-actions">
+                <button
+                  id="heroGetStarted"
+                  class="btn btn-primary btn-large"
+                  type="button"
+                >
+                  Get Started
+                </button>
+                <a class="btn btn-large" href="#how">See how it works</a>
+              </div>
+
+              <p class="hero-note">
+                PDFs • Images • Text • Notes • Saved history
+              </p>
+            </div>
+
+            <div class="hero-visual" aria-label="SIFTRA preview">
+              <div class="mock-window">
+                <div class="mock-head">
+                  <span class="dot"></span><span class="dot"></span
+                  ><span class="dot"></span>
+                  <strong style="margin-left: 8px; font-size: 13px"
+                    >SIFTRA Workspace</strong
+                  >
+                </div>
+                <div class="mock-body">
+                  <div class="mock-upload">
+                    <div class="mock-icon">↑</div>
+                    <h3>Drop a file here</h3>
+                    <p style="color: #777; font-size: 13px">
+                      or paste text to start understanding it
+                    </p>
+                    <div class="mock-lines">
+                      <div class="mock-line"></div>
+                      <div class="mock-line"></div>
+                      <div class="mock-line"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="trust-row">
+                <span>✓ Fast processing</span>
+                <span>✓ Personal history</span>
+                <span>✓ Simple output</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="features" class="section">
+          <div class="container">
+            <div class="section-head">
+              <span class="eyebrow">Everything in one workspace</span>
+              <h2>Built to make information easier to understand.</h2>
+              <p>
+                Instead of forcing users through a complicated interface, SIFTRA
+                keeps the experience focused and organized.
+              </p>
+            </div>
+
+            <div class="cards">
+              <article class="card">
+                <div class="icon">PDF</div>
+                <h3>PDF understanding</h3>
+                <p>
+                  Extract text from PDF documents and turn long material into a
+                  cleaner, readable summary.
+                </p>
+              </article>
+              <article class="card">
+                <div class="icon">OCR</div>
+                <h3>Image to text</h3>
+                <p>
+                  Upload an image containing text and SIFTRA can extract the
+                  words using OCR.
+                </p>
+              </article>
+              <article class="card">
+                <div class="icon">AI</div>
+                <h3>Smart summaries</h3>
+                <p>
+                  Generate concise summaries, key points and keywords from the
+                  content you provide.
+                </p>
+              </article>
+              <article class="card">
+                <div class="icon">TXT</div>
+                <h3>Text analysis</h3>
+                <p>
+                  Paste notes, articles, assignments or other text directly into
+                  your workspace.
+                </p>
+              </article>
+              <article class="card">
+                <div class="icon">↗</div>
+                <h3>Export results</h3>
+                <p>
+                  Download useful results as TXT or PDF so you can keep them
+                  outside the workspace.
+                </p>
+              </article>
+              <article class="card">
+                <div class="icon">⌁</div>
+                <h3>Personal history</h3>
+                <p>
+                  Signed-in users can save summaries to their own SIFTRA account
+                  and return to them later.
+                </p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section id="how" class="section" style="background: #fff">
+          <div class="container">
+            <div class="section-head">
+              <span class="eyebrow">Simple workflow</span>
+              <h2>From file to understanding in a few steps.</h2>
+              <p>
+                The interface is organized so users can move through the product
+                naturally.
+              </p>
+            </div>
+
+            <div class="steps">
+              <article class="step">
+                <div class="step-num">01</div>
+                <h3>Create an account</h3>
+                <p>
+                  Sign up or continue with Google to create your personal
+                  workspace.
+                </p>
+              </article>
+              <article class="step">
+                <div class="step-num">02</div>
+                <h3>Upload or paste</h3>
+                <p>
+                  Choose a PDF, image or paste the text you want to understand.
+                </p>
+              </article>
+              <article class="step">
+                <div class="step-num">03</div>
+                <h3>Generate a summary</h3>
+                <p>Choose a style and let SIFTRA organize the information.</p>
+              </article>
+              <article class="step">
+                <div class="step-num">04</div>
+                <h3>Save and export</h3>
+                <p>
+                  Save the result to your account or export it for later use.
+                </p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section id="security" class="section">
+          <div class="container split">
+            <div class="split-copy">
+              <span class="eyebrow">Designed around your workspace</span>
+              <h2>Your content, organized around your account.</h2>
+              <p>
+                SIFTRA uses authenticated accounts and user-specific storage so
+                your saved summaries are associated with your own account rather
+                than one shared browser history.
+              </p>
+              <div class="checks">
+                <div class="check">
+                  <span class="check-badge">✓</span>
+                  <div>
+                    <strong>Private account history</strong><br /><span
+                      class="muted"
+                      >Saved summaries are associated with the signed-in
+                      user.</span
+                    >
+                  </div>
+                </div>
+                <div class="check">
+                  <span class="check-badge">✓</span>
+                  <div>
+                    <strong>Protected database access</strong><br /><span
+                      class="muted"
+                      >Supabase Row Level Security can restrict records to their
+                      owner.</span
+                    >
+                  </div>
+                </div>
+                <div class="check">
+                  <span class="check-badge">✓</span>
+                  <div>
+                    <strong>Persistent sign-in</strong><br /><span class="muted"
+                      >Refresh the page without losing your authenticated
+                      session.</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-row">
+                <div>
+                  <strong>Account</strong><br /><small class="muted"
+                    >Authenticated workspace</small
+                  >
+                </div>
+                <span class="status">Connected</span>
+              </div>
+              <div class="panel-row">
+                <div>
+                  <strong>Saved summaries</strong><br /><small class="muted"
+                    >Personal history</small
+                  >
+                </div>
+                <span>Private</span>
+              </div>
+              <div class="panel-row">
+                <div>
+                  <strong>Exports</strong><br /><small class="muted"
+                    >TXT / PDF</small
+                  >
+                </div>
+                <span>Available</span>
+              </div>
+              <div class="panel-row">
+                <div>
+                  <strong>Processing</strong><br /><small class="muted"
+                    >Browser-based tools</small
+                  >
+                </div>
+                <span>Ready</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="faq" class="section" style="background: #fff">
+          <div class="container">
+            <div class="section-head">
+              <span class="eyebrow">Questions</span>
+              <h2>Frequently asked questions.</h2>
+              <p>Short answers before you enter the workspace.</p>
+            </div>
+
+            <div class="faq">
+              <div class="faq-item">
+                <button class="faq-q" type="button">
+                  What can I upload? <span>+</span>
+                </button>
+                <div class="faq-a">
+                  SIFTRA supports PDF files and images for extraction, plus
+                  direct text input. Audio and video can be handled when you
+                  provide a transcript or text content.
+                </div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-q" type="button">
+                  Do I need an account? <span>+</span>
+                </button>
+                <div class="faq-a">
+                  An account is required for the private workspace and cloud
+                  history. The public website can be viewed without signing in.
+                </div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-q" type="button">
+                  Can I access my history on another device? <span>+</span>
+                </button>
+                <div class="faq-a">
+                  Yes, when cloud history is connected to your Supabase account,
+                  you can sign into the same account from another device.
+                </div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-q" type="button">
+                  Can I download my summaries? <span>+</span>
+                </button>
+                <div class="faq-a">
+                  Yes. The workspace includes TXT and PDF export options.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="container">
+            <div class="cta">
+              <div>
+                <h2>Ready to understand your information faster?</h2>
+                <p>
+                  Create your SIFTRA workspace and start turning long content
+                  into something easier to work with.
+                </p>
+              </div>
+              <button id="bottomGetStarted" class="btn btn-large" type="button">
+                Create your account
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <div class="container">
+          <div class="footer-grid">
+            <div>
+              <a href="#home" class="logo"
+                ><span class="logo-mark">S</span><span>SIFTRA</span></a
+              >
+              <p class="muted">Upload Anything. Understand Everything.</p>
+            </div>
+            <div class="footer-col">
+              <div class="footer-title">Product</div>
+              <a href="#features">Features</a><a href="#how">How it works</a
+              ><a href="#security">Security</a>
+            </div>
+            <div class="footer-col">
+              <div class="footer-title">Support</div>
+              <a href="#faq">FAQ</a
+              ><button
+                id="footerSignIn"
+                style="
+                  border: 0;
+                  background: none;
+                  padding: 0;
+                  color: #6f7180;
+                  cursor: pointer;
+                "
+              >
+                Sign In
+              </button>
+            </div>
+            <div class="footer-col">
+              <div class="footer-title">Workspace</div>
+              <button
+                id="footerGetStarted"
+                style="
+                  border: 0;
+                  background: none;
+                  padding: 0;
+                  color: #6f7180;
+                  cursor: pointer;
+                "
+              >
+                Get Started
+              </button>
+            </div>
+          </div>
+          <div class="footer-bottom">
+            <span>© 2026 SIFTRA. All rights reserved.</span
+            ><span>Upload Anything. Understand Everything.</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ================= AUTHENTICATION ================= -->
+
+    <section id="authPage" class="auth-page hide">
+      <div class="auth-card">
+        <div class="auth-top">
+          <div class="auth-logo">S</div>
+          <h2 id="authTitle">Welcome back</h2>
+          <p id="authSubtitle" class="auth-subtitle">
+            Sign in to continue to your SIFTRA workspace.
+          </p>
+        </div>
+
+        <input
+          id="authName"
+          class="auth-input hide"
+          type="text"
+          placeholder="Full name"
+          autocomplete="name"
+        />
+        <input
+          id="authEmail"
+          class="auth-input"
+          type="email"
+          placeholder="Email address"
+          autocomplete="email"
+        />
+        <input
+          id="authPassword"
+          class="auth-input"
+          type="password"
+          placeholder="Password"
+          autocomplete="current-password"
+        />
+
+        <button
+          id="authSubmit"
+          class="btn btn-primary auth-submit"
+          type="button"
+        >
+          Sign In
+        </button>
+
+        <button id="googleAuth" class="google" type="button">
+          Continue with Google
+        </button>
+        <button id="forgotPassword" class="auth-link" type="button">
+          Forgot password?
+        </button>
+        <button id="switchAuth" class="auth-link" type="button">
+          Create an account
+        </button>
+        <button id="backToWebsite" class="auth-back" type="button">
+          ← Back to website
+        </button>
+
+        <p id="authMessage" class="auth-message"></p>
+      </div>
+    </section>
+
+    <!-- ================= APP ================= -->
+
+    <section id="appPage" class="app-shell hide">
+      <header class="app-header">
+        <div class="container app-header-row">
+          <div class="app-title">
+            <h1 id="workspaceGreeting">SIFTRA Workspace</h1>
+            <p>Upload, understand and organize your information.</p>
+          </div>
+          <div class="user-chip">
+            <div id="userAvatar" class="avatar">S</div>
+            <div>
+              <strong id="userNameDisplay">User</strong><br /><small
+                id="userEmailDisplay"
+                class="muted"
+                >user@email.com</small
+              >
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="app-nav">
+        <div class="container app-tabs">
+          <button
+            class="app-tab active"
+            data-app-page="dashboard"
+            type="button"
+          >
+            Workspace
+          </button>
+          <button class="app-tab" data-app-page="history" type="button">
+            History
+          </button>
+          <button class="app-tab" data-app-page="profile" type="button">
+            Profile
+          </button>
+          <button id="appSignOut" class="app-tab" type="button">
+            Sign Out
+          </button>
+        </div>
+      </div>
+
+      <main class="app-main">
+        <div class="container">
+          <!-- WORKSPACE -->
+          <section id="dashboardPage" class="app-subpage">
+            <div class="workspace">
+              <div class="workspace-card">
+                <h2>Upload a file</h2>
+                <p class="muted">PDF or image</p>
+
+                <div id="dropzone" class="dropzone">
+                  <div style="font-size: 28px; margin-bottom: 8px">↑</div>
+                  <strong>Drag & drop a file here</strong>
+                  <span>or choose a file from your device</span>
+                  <input
+                    id="fileInput"
+                    type="file"
+                    accept=".pdf,image/*"
+                    class="hide"
+                  />
+                  <button
+                    id="chooseFile"
+                    class="btn"
+                    type="button"
+                    style="margin-top: 15px"
+                  >
+                    Choose file
+                  </button>
+                  <div id="fileName" class="file-name"></div>
+                </div>
+              </div>
+
+              <div class="workspace-card">
+                <h2>Or paste text</h2>
+                <p class="muted">
+                  Use notes, articles, assignments or transcripts.
+                </p>
+                <textarea
+                  id="sourceText"
+                  placeholder="Paste your text here..."
+                ></textarea>
+              </div>
+
+              <div class="workspace-card full">
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 15px;
+                    align-items: center;
+                    flex-wrap: wrap;
+                  "
+                >
+                  <div>
+                    <h2>Summary settings</h2>
+                    <p class="muted">
+                      Choose how concise you want the result to be.
+                    </p>
+                  </div>
+                  <div class="controls" style="margin-top: 0">
+                    <select id="summaryStyle" class="select">
+                      <option value="balanced">Balanced</option>
+                      <option value="brief">Very brief</option>
+                      <option value="detailed">Detailed</option>
+                    </select>
+                    <button
+                      id="summarizeBtn"
+                      class="btn btn-primary"
+                      type="button"
+                    >
+                      Generate summary
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="workspace-card full">
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 12px;
+                    align-items: center;
+                    flex-wrap: wrap;
+                  "
+                >
+                  <div>
+                    <h2>Result</h2>
+                    <p id="resultMeta" class="muted">
+                      Your summary will appear here.
+                    </p>
+                  </div>
+                  <div class="controls" style="margin-top: 0">
+                    <button id="saveSummaryBtn" class="small-btn" type="button">
+                      Save
+                    </button>
+                    <button id="downloadTxtBtn" class="small-btn" type="button">
+                      TXT
+                    </button>
+                    <button id="downloadPdfBtn" class="small-btn" type="button">
+                      PDF
+                    </button>
+                  </div>
+                </div>
+
+                <div id="output" class="output" style="margin-top: 15px">
+                  <span class="muted">Nothing generated yet.</span>
+                </div>
+
+                <div style="margin-top: 18px">
+                  <strong>Key points</strong>
+                  <div id="keyPoints" class="pills">
+                    <span class="muted">—</span>
+                  </div>
+                </div>
+
+                <div style="margin-top: 18px">
+                  <strong>Keywords</strong>
+                  <div id="keywords" class="pills">
+                    <span class="muted">—</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- HISTORY -->
+          <section id="historyPage" class="app-subpage hide">
+            <div class="workspace-card">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  gap: 15px;
+                  flex-wrap: wrap;
+                "
+              >
+                <div>
+                  <h2>Saved history</h2>
+                  <p class="muted">
+                    Your summaries saved to your SIFTRA account.
+                  </p>
+                </div>
+                <button id="refreshHistory" class="small-btn" type="button">
+                  Refresh
+                </button>
+              </div>
+              <div
+                id="historyList"
+                class="history-list"
+                style="margin-top: 18px"
+              ></div>
+            </div>
+          </section>
+
+          <!-- PROFILE -->
+          <section id="profilePage" class="app-subpage hide">
+            <div class="workspace-card profile-box">
+              <h2>Your profile</h2>
+              <p class="muted">
+                Account information for your SIFTRA workspace.
+              </p>
+
+              <div class="profile-row">
+                <strong>Name</strong><br /><span id="profileName" class="muted"
+                  >—</span
+                >
+              </div>
+              <div class="profile-row">
+                <strong>Email</strong><br /><span
+                  id="profileEmail"
+                  class="muted"
+                  >—</span
+                >
+              </div>
+              <div class="profile-row">
+                <strong>Account created</strong><br /><span
+                  id="profileCreated"
+                  class="muted"
+                  >—</span
+                >
+              </div>
+
+              <button
+                id="profileSignOut"
+                class="btn"
+                type="button"
+                style="margin-top: 20px"
+              >
+                Sign Out
+              </button>
+            </div>
+          </section>
+        </div>
+      </main>
+    </section>
+
+    <div id="loading" class="loading hide">
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <strong id="loadingText">Processing...</strong>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hide"></div>
+
+    <script>
+      /* =========================================================
+   SIFTRA
+   Single-file application
+   Replace the two Supabase placeholders below.
    ========================================================= */
 
-var currentTab="text";
-
-var state={
-text:{
-text:"",
-name:"Pasted Text",
-result:null
-},
-pdf:{
-text:"",
-name:"",
-result:null
-},
-image:{
-text:"",
-name:"",
-result:null
-},
-audio:{
-text:"",
-name:"",
-result:null
-},
-video:{
-text:"",
-name:"",
-result:null
-}
-};
-
-
-/* ---------- HELPERS ---------- */
-
-function $(id){
-return document.getElementById(id);
-}
-
-function notify(message){
-
-$("toast").textContent=message;
-
-$("toast").classList.add("show");
-
-clearTimeout(window.toastTimer);
-
-window.toastTimer=setTimeout(function(){
-
-$("toast").classList.remove("show");
-
-},2500);
-}
-
-
-function countWords(text){
-
-text=(text||"").trim();
-
-return text
-?text.split(/\s+/).length
-:0;
-
-}
-
-
-function clean(text){
-
-return (text||"")
-.replace(/\r/g," ")
-.replace(/[ \t]+/g," ")
-.replace(/\n{3,}/g,"\n\n")
-.trim();
-
-}
-
-
-/* ---------- NAVIGATION ---------- */
-
-function showPage(name){
-
-$("home").classList.toggle(
-"hide",
-name!=="home"
-);
-
-$("app").classList.toggle(
-"hide",
-name!=="app"
-);
-
-$("history").classList.toggle(
-"hide",
-name!=="history"
-);
-
-if(name==="history"){
-renderHistory();
-}
-
-window.scrollTo({
-top:0,
-behavior:"smooth"
-});
-
-}
-
-
-$("homeNav").addEventListener(
-"click",
-function(){
-showPage("home");
-}
-);
-
-
-$("sumNav").addEventListener(
-"click",
-function(){
-showPage("app");
-}
-);
-
-
-$("historyNav").addEventListener(
-"click",
-function(){
-showPage("history");
-}
-);
-
-
-$("start").addEventListener(
-"click",
-function(){
-showPage("app");
-}
-);
-
-
-/* ---------- TABS ---------- */
-
-document.querySelectorAll(".tab").forEach(
-function(button){
-
-button.addEventListener(
-"click",
-function(){
-
-currentTab=
-button.getAttribute("data-tab");
-
-document.querySelectorAll(".tab")
-.forEach(function(tab){
-
-tab.classList.toggle(
-"active",
-tab===button
-);
-
-});
-
-
-document.querySelectorAll(".panel")
-.forEach(function(panel){
-
-panel.classList.toggle(
-"hide",
-panel.getAttribute("data-type")
-!==currentTab
-);
-
-});
-
-showResult();
-
-}
-);
-
-}
-);
-
-
-/* ---------- TEXT ---------- */
-
-$("textInput").addEventListener(
-"input",
-function(){
-
-state.text.text=$("textInput").value;
-
-$("wordCount").textContent=
-countWords(state.text.text)+" words";
-
-}
-);
-
-
-/* ---------- AUDIO / VIDEO TRANSCRIPTS ---------- */
-
-$("audioTranscript").addEventListener(
-"input",
-function(){
-
-state.audio.text=
-clean($("audioTranscript").value);
-
-}
-);
-
-
-$("videoTranscript").addEventListener(
-"input",
-function(){
-
-state.video.text=
-clean($("videoTranscript").value);
-
-}
-);
-
-
-/* ---------- PROGRESS ---------- */
-
-function progress(percent,message){
-
-$("progress").classList.remove("hide");
-
-$("fill").style.width=
-percent+"%";
-
-$("progressNumber").textContent=
-Math.round(percent)+"%";
-
-$("progressText").textContent=
-message;
-
-}
-
-
-function stopProgress(){
-
-$("progress").classList.add("hide");
-
-$("fill").style.width="0%";
-
-}
-
-
-/* ---------- PDF ---------- */
-
-if(window.pdfjsLib){
-
-pdfjsLib.GlobalWorkerOptions.workerSrc=
-"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-
-}
-
-
-$("pdfButton").addEventListener(
-"click",
-function(){
-
-$("pdfFile").click();
-
-}
-);
-
-
-$("pdfFile").addEventListener(
-"change",
-function(){
-
-if(this.files[0]){
-extractPDF(this.files[0]);
-}
-
-}
-);
-
-
-async function extractPDF(file){
-
-try{
-
-if(!window.pdfjsLib){
-
-throw new Error(
-"PDF reader could not be loaded."
-);
-
-}
-
-state.pdf={
-text:"",
-name:file.name,
-result:null
-};
-
-progress(
-5,
-"Opening PDF..."
-);
-
-var pdf=
-await getPDF(file);
-
-var text="";
-
-for(
-var i=1;
-i<=pdf.numPages;
-i++
-){
-
-var page=
-await pdf.getPage(i);
-
-var content=
-await page.getTextContent();
-
-text+=
-content.items
-.map(function(item){
-return item.str;
-})
-.join(" ")
-+"\n";
-
-progress(
-5+(i/pdf.numPages)*90,
-"Reading page "+i+" of "+pdf.numPages
-);
-
-}
-
-text=clean(text);
-
-if(!text){
-
-throw new Error(
-"No selectable text was found in this PDF."
-);
-
-}
-
-state.pdf.text=text;
-
-$("pdfInfo").textContent=
-file.name+
-" • "+
-pdf.numPages+
-" pages • "+
-countWords(text)+
-" words";
-
-$("pdfInfo").classList.remove("hide");
-
-progress(
-100,
-"PDF ready"
-);
-
-notify("PDF text extracted.");
-
-setTimeout(
-stopProgress,
-500
-);
-
-}catch(error){
-
-stopProgress();
-
-notify(
-error.message||
-"PDF could not be read."
-);
-
-}
-
-}
-
-
-function getPDF(file){
-
-return new Promise(
-function(resolve,reject){
-
-var reader=
-new FileReader();
-
-reader.onload=function(){
-
-pdfjsLib
-.getDocument({
-data:new Uint8Array(
-reader.result
-)
-})
-.promise
-.then(resolve)
-.catch(reject);
-
-};
-
-reader.onerror=function(){
-
-reject(
-new Error(
-"Could not open the PDF."
-)
-);
-
-};
-
-reader.readAsArrayBuffer(file);
-
-}
-);
-
-}
-
-
-/* ---------- IMAGE OCR ---------- */
-
-$("imageButton").addEventListener(
-"click",
-function(){
-
-$("imageFile").click();
-
-}
-);
-
-
-$("imageFile").addEventListener(
-"change",
-function(){
-
-if(this.files[0]){
-extractImage(this.files[0]);
-}
-
-}
-);
-
-
-async function extractImage(file){
-
-try{
-
-if(!window.Tesseract){
-
-throw new Error(
-"Image OCR could not be loaded."
-);
-
-}
-
-state.image={
-text:"",
-name:file.name,
-result:null
-};
-
-
-/* Preview */
-
-var previewURL=
-URL.createObjectURL(file);
-
-$("imagePreview").src=
-previewURL;
-
-$("imagePreview").classList.remove(
-"hide"
-);
-
-
-progress(
-5,
-"Preparing image OCR..."
-);
-
-
-var result=
-await Tesseract.recognize(
-file,
-"eng",
-{
-logger:function(info){
-
-if(info.progress){
-
-progress(
-10+
-info.progress*85,
-info.status||
-"Reading image..."
-);
-
-}
-
-}
-}
-);
-
-
-var text=
-clean(result.data.text);
-
-
-if(!text){
-
-throw new Error(
-"No readable text was found in this image."
-);
-
-}
-
-
-state.image.text=text;
-
-
-$("imageInfo").textContent=
-file.name+
-" • "+
-countWords(text)+
-" words detected";
-
-$("imageInfo").classList.remove(
-"hide"
-);
-
-
-progress(
-100,
-"Image ready"
-);
-
-notify(
-"Image text extracted."
-);
-
-setTimeout(
-stopProgress,
-500
-);
-
-
-}catch(error){
-
-stopProgress();
-
-notify(
-error.message||
-"Image could not be read."
-);
-
-}
-
-}
-
-
-/* ---------- MEDIA FILES ---------- */
-
-function setupMediaInput(
-inputId,
-buttonId,
-infoId,
-type
-){
-
-$(buttonId).addEventListener(
-"click",
-function(){
-
-$(inputId).click();
-
-}
-);
-
-
-$(inputId).addEventListener(
-"change",
-function(){
-
-var file=this.files[0];
-
-if(!file)return;
-
-state[type]={
-text:state[type].text||"",
-name:file.name,
-result:null
-};
-
-$(infoId).textContent=
-file.name+
-" • "+
-formatBytes(file.size)+
-" • selected";
-
-$(infoId).classList.remove(
-"hide"
-);
-
-notify(
-(type==="audio"?"Audio":"Video")+
-" selected."
-);
-
-}
-);
-
-}
-
-
-function formatBytes(bytes){
-
-if(!bytes)return "0 B";
-
-var units=[
-"B",
-"KB",
-"MB",
-"GB"
-];
-
-var i=
-Math.floor(
-Math.log(bytes)/
-Math.log(1024)
-);
-
-i=Math.min(
-i,
-units.length-1
-);
-
-return(
-bytes/
-Math.pow(1024,i)
-).toFixed(
-i?1:0
-)
-+" "+
-units[i];
-
-}
-
-
-setupMediaInput(
-"audioFile",
-"audioButton",
-"audioInfo",
-"audio"
-);
-
-
-setupMediaInput(
-"videoFile",
-"videoButton",
-"videoInfo",
-"video"
-);
-
-
-/* ---------- DRAG AND DROP ---------- */
-
-function setupDropZone(
-zoneId,
-inputId
-){
-
-var zone=$(zoneId);
-
-[
-"dragenter",
-"dragover"
-].forEach(function(eventName){
-
-zone.addEventListener(
-eventName,
-function(event){
-
-event.preventDefault();
-event.stopPropagation();
-
-zone.classList.add("drag");
-
-}
-);
-
-});
-
-
-[
-"dragleave",
-"drop"
-].forEach(function(eventName){
-
-zone.addEventListener(
-eventName,
-function(event){
-
-event.preventDefault();
-event.stopPropagation();
-
-zone.classList.remove("drag");
-
-}
-);
-
-});
-
-
-zone.addEventListener(
-"drop",
-function(event){
-
-var files=
-event.dataTransfer.files;
-
-if(!files.length)return;
-
-var input=$(inputId);
-
-try{
-
-var dataTransfer=
-new DataTransfer();
-
-dataTransfer.items.add(
-files[0]
-);
-
-input.files=
-dataTransfer.files;
-
-input.dispatchEvent(
-new Event("change")
-);
-
-}catch(error){
-
-notify(
-"File selected. Use the Choose button if your browser blocks drag and drop."
-);
-
-}
-
-}
-);
-
-}
-
-
-setupDropZone(
-"pdfDrop",
-"pdfFile"
-);
-
-setupDropZone(
-"imageDrop",
-"imageFile"
-);
-
-setupDropZone(
-"audioDrop",
-"audioFile"
-);
-
-setupDropZone(
-"videoDrop",
-"videoFile"
-);
-
-
-/* ---------- SENTENCE PROCESSING ---------- */
-
-var stopWords={
-"the":1,
-"and":1,
-"that":1,
-"this":1,
-"with":1,
-"from":1,
-"have":1,
-"has":1,
-"was":1,
-"were":1,
-"are":1,
-"for":1,
-"into":1,
-"about":1,
-"their":1,
-"they":1,
-"them":1,
-"then":1,
-"than":1,
-"when":1,
-"where":1,
-"which":1,
-"what":1,
-"your":1,
-"you":1,
-"our":1,
-"also":1,
-"more":1,
-"some":1,
-"these":1,
-"those":1,
-"been":1,
-"being":1,
-"because":1,
-"while":1,
-"through":1,
-"each":1,
-"other":1,
-"only":1,
-"very":1,
-"just":1,
-"can":1,
-"could":1,
-"should":1,
-"would":1,
-"will":1,
-"may":1,
-"not":1,
-"but":1,
-"its":1,
-"his":1,
-"her":1,
-"she":1,
-"there":1,
-"here":1,
-"much":1,
-"many":1,
-"such":1,
-"over":1,
-"under":1,
-"between":1,
-"said":1
-};
-
-
-function getSentences(text){
-
-var parts=
-clean(text)
-.replace(/\n+/g," ")
-.match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[];
-
-return parts
-.map(function(s){
-return s.trim();
-})
-.filter(function(s){
-return s.length>20;
-});
-
-}
-
-
-function getKeywords(text){
-
-var frequency={};
-
-var words=
-text
-.toLowerCase()
-.match(/[a-zA-Z]{4,}/g)||[];
-
-words.forEach(function(word){
-
-if(!stopWords[word]){
-
-frequency[word]=
-(frequency[word]||0)+1;
-
-}
-
-});
-
-
-return Object.keys(frequency)
-.sort(function(a,b){
-
-return frequency[b]-
-frequency[a];
-
-})
-.slice(0,10);
-
-}
-
-
-/* ---------- SUMMARY ---------- */
-
-function createSummary(
-text,
-style
-){
-
-var sentences=
-getSentences(text);
-
-var keys=
-getKeywords(text);
-
-
-if(!sentences.length){
-
-var raw=
-text.split(/\s+/);
-
-var fallback=
-raw.slice(
-0,
-Math.min(100,raw.length)
-).join(" ");
-
-if(
-raw.length>100
-){
-fallback+="...";
-}
-
-if(
-style==="bullets"||
-style==="takeaways"
-){
-
-return "• "+fallback;
-
-}
-
-return fallback;
-
-}
-
-
-var scored=
-sentences.map(function(
-sentence,
-index
-){
-
-var score=
-index===0?3:0;
-
-keys.forEach(
-function(key){
-
-if(
-sentence
-.toLowerCase()
-.indexOf(key)>=0
-){
-
-score+=2;
-
-}
-
-}
-);
-
-return{
-sentence:sentence,
-index:index,
-score:score
-};
-
-});
-
-
-scored.sort(
-function(a,b){
-return b.score-a.score;
-}
-);
-
-
-var amount;
-
-if(style==="short"){
-
-amount=
-Math.min(3,sentences.length);
-
-}else if(
-style==="paragraph"
-){
-
-amount=
-Math.min(5,sentences.length);
-
-}else{
-
-amount=
-Math.min(6,sentences.length);
-
-}
-
-
-var selected=
-scored
-.slice(0,amount)
-.sort(function(a,b){
-
-return a.index-b.index;
-
-});
-
-
-if(
-style==="bullets"||
-style==="takeaways"
-){
-
-return selected
-.map(function(item){
-
-return "• "+
-item.sentence;
-
-})
-.join("\n");
-
-}
-
-
-return selected
-.map(function(item){
-
-return item.sentence;
-
-})
-.join(" ");
-
-}
-
-
-function makePoints(text){
-
-return getSentences(text)
-.slice(0,5);
-
-}
-
-
-/* ---------- GET CURRENT INPUT ---------- */
-
-function getInput(){
-
-if(currentTab==="text"){
-
-state.text.text=
-clean($("textInput").value);
-
-}
-
-if(currentTab==="audio"){
-
-state.audio.text=
-clean($("audioTranscript").value);
-
-}
-
-if(currentTab==="video"){
-
-state.video.text=
-clean($("videoTranscript").value);
-
-}
-
-return state[currentTab].text;
-
-}
-
-
-/* ---------- SUMMARIZE ---------- */
-
-$("summarize").addEventListener(
-"click",
-function(){
-
-var text=
-getInput();
-
-
-if(!text){
-
-if(
-currentTab==="audio"||
-currentTab==="video"
-){
-
-notify(
-"Paste the transcript first."
-);
-
-}else{
-
-notify(
-"Add some content first."
-);
-
-}
-
-return;
-
-}
-
-
-$("summarize").disabled=true;
-
-$("summarize").textContent=
-"Summarizing...";
-
-
-progress(
-25,
-"Analyzing content..."
-);
-
-
-setTimeout(
-function(){
-
-try{
-
-var style=
-$("style").value;
-
-var summary=
-createSummary(
-text,
-style
-);
-
-
-state[currentTab].result={
-
-summary:summary,
-
-points:
-makePoints(text),
-
-keywords:
-getKeywords(text),
-
-originalWords:
-countWords(text),
-
-summaryWords:
-countWords(summary),
-
-type:currentTab,
-
-name:
-state[currentTab].name||
-currentTab,
-
-createdAt:
-new Date().toISOString()
-
-};
-
-
-saveHistory(
-state[currentTab].result,
-text
-);
-
-
-progress(
-100,
-"Summary ready"
-);
-
-showResult();
-
-notify(
-"Summary ready."
-);
-
-
-setTimeout(
-stopProgress,
-500
-);
-
-
-}catch(error){
-
-stopProgress();
-
-notify(
-"Could not create the summary."
-);
-
-}
-
-
-$("summarize").disabled=false;
-
-$("summarize").textContent=
-"Summarize";
-
-},
-80
-);
-
-});
-
-
-/* ---------- SHOW RESULT ---------- */
-
-function showResult(){
-
-var result=
-state[currentTab].result;
-
-$("result").classList.toggle(
-"hide",
-!result
-);
-
-if(!result)return;
-
-
-$("resultTitle").textContent=
-result.name||
-"Summary";
-
-$("originalStat").textContent=
-result.originalWords+
-" words";
-
-$("summaryStat").textContent=
-result.summaryWords+
-" words";
-
-$("sourceStat").textContent=
-result.type.toUpperCase();
-
-$("summaryOutput").textContent=
-result.summary;
-
-
-$("points").innerHTML="";
-
-result.points.forEach(
-function(point){
-
-var li=
-document.createElement("li");
-
-li.textContent=point;
-
-$("points").appendChild(li);
-
-}
-);
-
-
-$("keywords").innerHTML="";
-
-result.keywords.forEach(
-function(word){
-
-var span=
-document.createElement("span");
-
-span.className="key";
-
-span.textContent=word;
-
-$("keywords").appendChild(span);
-
-}
-);
-
-}
-
-
-/* ---------- CLEAR ---------- */
-
-$("clear").addEventListener(
-"click",
-function(){
-
-state[currentTab]={
-text:"",
-name:
-currentTab==="text"
-?"Pasted Text"
-:"",
-result:null
-};
-
-
-if(currentTab==="text"){
-
-$("textInput").value="";
-
-$("wordCount").textContent=
-"0 words";
-
-}
-
-
-if(currentTab==="audio"){
-
-$("audioTranscript").value="";
-
-}
-
-
-if(currentTab==="video"){
-
-$("videoTranscript").value="";
-
-}
-
-
-if(currentTab==="pdf"){
-
-$("pdfFile").value="";
-
-}
-
-
-if(currentTab==="image"){
-
-$("imageFile").value="";
-
-$("imagePreview").src="";
-
-$("imagePreview")
-.classList.add("hide");
-
-}
-
-
-[
-"pdfInfo",
-"imageInfo",
-"audioInfo",
-"videoInfo"
-]
-.forEach(function(id){
-
-$(id).classList.add("hide");
-
-});
-
-
-$("result").classList.add("hide");
-
-$("searchInput").value="";
-
-$("searchOutput")
-.classList.add("hide");
-
-stopProgress();
-
-notify(
-"Workspace cleared."
-);
-
-});
-
-
-/* ---------- COPY ---------- */
-
-$("copy").addEventListener(
-"click",
-async function(){
-
-var result=
-state[currentTab].result;
-
-if(!result)return;
-
-try{
-
-await navigator.clipboard.writeText(
-result.summary
-);
-
-notify(
-"Summary copied."
-);
-
-}catch(error){
-
-notify(
-"Copy is unavailable in this browser."
-);
-
-}
-
-});
-
-
-/* ---------- DOWNLOAD ---------- */
-
-function downloadFile(
-blob,
-name
-){
-
-var url=
-URL.createObjectURL(blob);
-
-var link=
-document.createElement("a");
-
-link.href=url;
-
-link.download=name;
-
-document.body.appendChild(link);
-
-link.click();
-
-link.remove();
-
-setTimeout(
-function(){
-
-URL.revokeObjectURL(url);
-
-},
-500
-);
-
-}
-
-
-$("downloadTxt").addEventListener(
-"click",
-function(){
-
-var result=
-state[currentTab].result;
-
-if(!result)return;
-
-downloadFile(
-
-new Blob(
-[
-"SIFTRA SUMMARY\n\n"+
-result.summary
-],
-{
-type:"text/plain"
-}
-),
-
-"siftra-summary.txt"
-
-);
-
-});
-
-
-/* ---------- PDF EXPORT ---------- */
-
-$("downloadPdf").addEventListener(
-"click",
-function(){
-
-var result=
-state[currentTab].result;
-
-if(!result)return;
-
-
-if(
-!window.jspdf||
-!window.jspdf.jsPDF
-){
-
-notify(
-"PDF export is unavailable."
-);
-
-return;
-
-}
-
-
-var pdf=
-new window.jspdf.jsPDF();
-
-pdf.setFontSize(18);
-
-pdf.text(
-"SIFTRA Summary",
-15,
-20
-);
-
-pdf.setFontSize(11);
-
-
-var lines=
-pdf.splitTextToSize(
-result.summary,
-175
-);
-
-var y=35;
-
-
-lines.forEach(
-function(line){
-
-if(y>275){
-
-pdf.addPage();
-
-y=20;
-
-}
-
-pdf.text(
-line,
-15,
-y
-);
-
-y+=7;
-
-}
-);
-
-
-pdf.save(
-"siftra-summary.pdf"
-);
-
-notify(
-"PDF downloaded."
-);
-
-});
-
-
-/* ---------- SEARCH ---------- */
-
-$("searchButton").addEventListener(
-"click",
-function(){
-
-var text=
-getInput();
-
-var query=
-$("searchInput")
-.value
-.trim();
-
-
-if(!query){
-
-$("searchOutput")
-.classList.add("hide");
-
-return;
-
-}
-
-
-var position=
-text
-.toLowerCase()
-.indexOf(
-query.toLowerCase()
-);
-
-
-if(position<0){
-
-$("searchOutput").textContent=
-"No matching text found.";
-
-}else{
-
-var start=
-Math.max(
-0,
-position-180
-);
-
-var end=
-Math.min(
-text.length,
-position+
-query.length+
-300
-);
-
-$("searchOutput").textContent=
-text.substring(
-start,
-end
-);
-
-}
-
-
-$("searchOutput")
-.classList.remove(
-"hide"
-);
-
-});
-
-
-/* ---------- HISTORY ---------- */
-
-function getHistory(){
-
-try{
-
-return JSON.parse(
-localStorage.getItem(
-"siftra_history"
-)||"[]"
-);
-
-}catch(error){
-
-return [];
-
-}
-
-}
-
-
-function saveHistory(
-result,
-original
-){
-
-var list=
-getHistory();
-
-
-/*
-Avoid immediately saving the exact same
-summary repeatedly.
+      /* ---------- SUPABASE ---------- */
+
+      const SUPABASE_URL = "https://zbyhnrfjwkihgpkttxah.supabase.co";
+      const SUPABASE_KEY = "sb_publishable_yOp2FIWAE0vjwov0pIv_AQ_w6WfDF-z";
+
+      const supabaseReady =
+        SUPABASE_URL !== "YOUR_SUPABASE_PROJECT_URL" &&
+        SUPABASE_KEY !== "YOUR_SUPABASE_PUBLISHABLE_KEY";
+
+      let supabaseClient = null;
+
+      if (supabaseReady && window.supabase) {
+        const { createClient } = window.supabase;
+        supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+      }
+
+      /* ---------- STATE ---------- */
+
+      let currentUser = null;
+      let authMode = "signin";
+      let currentResult = null;
+      let currentSourceText = "";
+      let selectedFile = null;
+
+      /* ---------- HELPERS ---------- */
+
+      function $(id) {
+        return document.getElementById(id);
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function notify(message) {
+        const toast = $("toast");
+        toast.textContent = message;
+        toast.classList.remove("hide");
+        clearTimeout(window.__toastTimer);
+        window.__toastTimer = setTimeout(
+          () => toast.classList.add("hide"),
+          3200,
+        );
+      }
+
+      function setLoading(show, message = "Processing...") {
+        $("loadingText").textContent = message;
+        $("loading").classList.toggle("hide", !show);
+      }
+
+      function setAuthMessage(message) {
+        $("authMessage").textContent = message || "";
+      }
+
+      function friendlyError(error) {
+        return error?.message || "Something went wrong. Please try again.";
+      }
+
+      /* ---------- PUBLIC / APP SWITCHING ---------- */
+
+      function showLanding() {
+        $("publicSite").classList.remove("hide");
+        $("authPage").classList.add("hide");
+        $("appPage").classList.add("hide");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function showAuth(mode = "signin") {
+        authMode = mode;
+        $("publicSite").classList.add("hide");
+        $("authPage").classList.remove("hide");
+        $("appPage").classList.add("hide");
+
+        $("authName").classList.toggle("hide", mode !== "signup");
+
+        if (mode === "signin") {
+          $("authTitle").textContent = "Welcome back";
+          $("authSubtitle").textContent =
+            "Sign in to continue to your SIFTRA workspace.";
+          $("authSubmit").textContent = "Sign In";
+          $("switchAuth").textContent = "Create an account";
+          $("authPassword").setAttribute("autocomplete", "current-password");
+        } else {
+          $("authTitle").textContent = "Create your SIFTRA account";
+          $("authSubtitle").textContent =
+            "Create an account to save and access your summaries.";
+          $("authSubmit").textContent = "Create Account";
+          $("switchAuth").textContent = "Already have an account? Sign in";
+          $("authPassword").setAttribute("autocomplete", "new-password");
+        }
+
+        setAuthMessage("");
+      }
+
+      function showApp(page = "dashboard") {
+        if (!currentUser) {
+          showAuth("signin");
+          return;
+        }
+
+        $("publicSite").classList.add("hide");
+        $("authPage").classList.add("hide");
+        $("appPage").classList.remove("hide");
+
+        document
+          .querySelectorAll(".app-subpage")
+          .forEach((el) => el.classList.add("hide"));
+        document
+          .querySelectorAll(".app-tab[data-app-page]")
+          .forEach((el) => el.classList.remove("active"));
+
+        const target =
+          page === "history"
+            ? $("historyPage")
+            : page === "profile"
+              ? $("profilePage")
+              : $("dashboardPage");
+
+        target.classList.remove("hide");
+
+        const tab = document.querySelector(
+          '.app-tab[data-app-page="' + page + '"]',
+        );
+        if (tab) tab.classList.add("active");
+
+        if (page === "history") loadHistory();
+        if (page === "profile") loadProfile();
+      }
+
+      function updateLoggedInUserUI() {
+        if (!currentUser) return;
+
+        const metadata = currentUser.user_metadata || {};
+        const name =
+          metadata.full_name ||
+          metadata.name ||
+          currentUser.email?.split("@")[0] ||
+          "User";
+        const initials = name
+          .split(/\s+/)
+          .map((x) => x[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase();
+
+        $("userNameDisplay").textContent = name;
+        $("userEmailDisplay").textContent = currentUser.email || "";
+        $("userAvatar").textContent = initials || "S";
+        $("workspaceGreeting").textContent = "Welcome, " + name;
+
+        $("profileName").textContent = name;
+        $("profileEmail").textContent = currentUser.email || "—";
+        $("profileCreated").textContent = currentUser.created_at
+          ? new Date(currentUser.created_at).toLocaleDateString()
+          : "—";
+      }
+
+      /* ---------- AUTH ---------- */
+
+      async function createProfile(user, name) {
+        if (!supabaseClient || !user) return;
+
+        const { error } = await supabaseClient.from("profiles").upsert({
+          id: user.id,
+          full_name: name || user.user_metadata?.full_name || "",
+          avatar_url: user.user_metadata?.avatar_url || "",
+          email: user.email || "",
+        });
+
+        if (error) console.error("Profile error:", error);
+      }
+
+      $("authSubmit").addEventListener("click", async function () {
+        if (!supabaseClient) {
+          setAuthMessage(
+            "Connect your Supabase URL and publishable key in the code first.",
+          );
+          return;
+        }
+
+        const email = $("authEmail").value.trim();
+        const password = $("authPassword").value;
+        const name = $("authName").value.trim();
+
+        setAuthMessage("");
+
+        if (!email) {
+          setAuthMessage("Please enter your email address.");
+          return;
+        }
+
+        if (!password) {
+          setAuthMessage("Please enter your password.");
+          return;
+        }
+
+        if (authMode === "signup" && !name) {
+          setAuthMessage("Please enter your name.");
+          return;
+        }
+
+        if (password.length < 6) {
+          setAuthMessage("Password must be at least 6 characters.");
+          return;
+        }
+
+        $("authSubmit").disabled = true;
+        $("authSubmit").textContent = "Please wait...";
+
+        try {
+          if (authMode === "signin") {
+            const { data, error } =
+              await supabaseClient.auth.signInWithPassword({
+                email,
+                password,
+              });
+
+            if (error) throw error;
+
+            currentUser = data.user;
+            updateLoggedInUserUI();
+            showApp("dashboard");
+          } else {
+            const { data, error } = await supabaseClient.auth.signUp({
+              email,
+              password,
+              options: {
+                data: { full_name: name },
+              },
+            });
+
+            if (error) throw error;
+
+            if (data.user) {
+              await createProfile(data.user, name);
+            }
+
+            if (data.session) {
+              currentUser = data.user;
+              updateLoggedInUserUI();
+              showApp("dashboard");
+            } else {
+              setAuthMessage(
+                "Account created. Check your email to confirm your account, then sign in.",
+              );
+            }
+          }
+        } catch (error) {
+          console.error(error);
+          setAuthMessage(friendlyError(error));
+        } finally {
+          $("authSubmit").disabled = false;
+          $("authSubmit").textContent =
+            authMode === "signin" ? "Sign In" : "Create Account";
+        }
+      });
+
+      $("googleAuth").addEventListener("click", async function () {
+        if (!supabaseClient) {
+          setAuthMessage("Connect Supabase first.");
+          return;
+        }
+
+        setAuthMessage("Opening Google sign in...");
+
+        const { error } = await supabaseClient.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: window.location.origin,
+          },
+        });
+
+        if (error) {
+          console.error(error);
+          setAuthMessage(friendlyError(error));
+        }
+      });
+
+      $("switchAuth").addEventListener("click", function () {
+        showAuth(authMode === "signin" ? "signup" : "signin");
+      });
+
+      $("forgotPassword").addEventListener("click", async function () {
+        if (!supabaseClient) {
+          setAuthMessage("Connect Supabase first.");
+          return;
+        }
+
+        const email = $("authEmail").value.trim();
+
+        if (!email) {
+          setAuthMessage("Enter your email address first.");
+          $("authEmail").focus();
+          return;
+        }
+
+        setAuthMessage("Sending password reset email...");
+
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(
+          email,
+          {
+            redirectTo: window.location.origin,
+          },
+        );
+
+        if (error) {
+          console.error(error);
+          setAuthMessage(friendlyError(error));
+          return;
+        }
+
+        setAuthMessage(
+          "Password reset instructions have been sent to your email.",
+        );
+      });
+
+      $("backToWebsite").addEventListener("click", showLanding);
+
+      async function signOut() {
+        if (supabaseClient) {
+          const { error } = await supabaseClient.auth.signOut();
+          if (error) {
+            console.error(error);
+            notify(friendlyError(error));
+            return;
+          }
+        }
+
+        currentUser = null;
+        currentResult = null;
+        currentSourceText = "";
+        showLanding();
+      }
+
+      $("appSignOut").addEventListener("click", signOut);
+      $("profileSignOut").addEventListener("click", signOut);
+
+      /* ---------- SESSION ---------- */
+
+      async function initializeAuthentication() {
+        if (!supabaseClient) {
+          showLanding();
+          return;
+        }
+
+        const { data, error } = await supabaseClient.auth.getSession();
+
+        if (error) {
+          console.error("Session error:", error);
+          showLanding();
+          return;
+        }
+
+        currentUser = data.session ? data.session.user : null;
+
+        if (currentUser) {
+          updateLoggedInUserUI();
+          showApp("dashboard");
+        } else {
+          showLanding();
+        }
+      }
+
+      if (supabaseClient) {
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+          currentUser = session ? session.user : null;
+
+          if (currentUser) {
+            updateLoggedInUserUI();
+            showApp("dashboard");
+          } else {
+            showLanding();
+          }
+        });
+      }
+
+      /* ---------- LANDING BUTTONS ---------- */
+
+      ["navSignIn", "footerSignIn"].forEach((id) => {
+        $(id).addEventListener("click", () => showAuth("signin"));
+      });
+
+      [
+        "navGetStarted",
+        "heroGetStarted",
+        "bottomGetStarted",
+        "footerGetStarted",
+      ].forEach((id) => {
+        $(id).addEventListener("click", () => showAuth("signup"));
+      });
+
+      $("mobileMenu").addEventListener("click", () => {
+        $("publicNav").classList.toggle("mobile-open");
+      });
+
+      document.querySelectorAll("#publicNav a").forEach((link) => {
+        link.addEventListener("click", () =>
+          $("publicNav").classList.remove("mobile-open"),
+        );
+      });
+
+      /* ---------- FAQ ---------- */
+
+      document.querySelectorAll(".faq-q").forEach((button) => {
+        button.addEventListener("click", () => {
+          const item = button.closest(".faq-item");
+          const isOpen = item.classList.contains("open");
+
+          document
+            .querySelectorAll(".faq-item")
+            .forEach((x) => x.classList.remove("open"));
+          item.classList.toggle("open", !isOpen);
+          button.querySelector("span").textContent = !isOpen ? "−" : "+";
+        });
+      });
+
+      /* ---------- APP NAVIGATION ---------- */
+
+      document.querySelectorAll(".app-tab[data-app-page]").forEach((button) => {
+        button.addEventListener("click", () => {
+          showApp(button.dataset.appPage);
+        });
+      });
+
+      /* ---------- FILE INPUT ---------- */
+
+      $("chooseFile").addEventListener("click", () => {
+        $("fileInput").click();
+      });
+
+      $("fileInput").addEventListener("change", async function () {
+        const file = this.files?.[0];
+        if (file) await handleFile(file);
+      });
+
+      const dropzone = $("dropzone");
+
+      dropzone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropzone.classList.add("drag");
+      });
+
+      dropzone.addEventListener("dragleave", () => {
+        dropzone.classList.remove("drag");
+      });
+
+      dropzone.addEventListener("drop", async (e) => {
+        e.preventDefault();
+        dropzone.classList.remove("drag");
+
+        const file = e.dataTransfer.files?.[0];
+        if (file) await handleFile(file);
+      });
+
+      async function handleFile(file) {
+        selectedFile = file;
+        $("fileName").textContent = file.name;
+
+        try {
+          if (
+            file.type === "application/pdf" ||
+            file.name.toLowerCase().endsWith(".pdf")
+          ) {
+            setLoading(true, "Reading PDF...");
+            const text = await extractPdfText(file);
+            $("sourceText").value = text;
+            currentSourceText = text;
+            notify("PDF text extracted.");
+          } else if (file.type.startsWith("image/")) {
+            setLoading(true, "Reading image text...");
+            const text = await extractImageText(file);
+            $("sourceText").value = text;
+            currentSourceText = text;
+            notify("Image text extracted.");
+          } else {
+            notify("Please choose a PDF or image.");
+          }
+        } catch (error) {
+          console.error(error);
+          notify("Could not read this file.");
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      /* ---------- PDF ---------- */
+
+      async function extractPdfText(file) {
+        const buffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+        let fullText = "";
+
+        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+          const page = await pdf.getPage(pageNumber);
+          const content = await page.getTextContent();
+          const text = content.items.map((item) => item.str).join(" ");
+          fullText += "\n\n" + text;
+        }
+
+        return fullText.trim();
+      }
+
+      /* ---------- OCR ---------- */
+
+      async function extractImageText(file) {
+        const result = await Tesseract.recognize(file, "eng", {
+          logger: (message) => {
+            if (message.status === "recognizing text") {
+              const pct = Math.round((message.progress || 0) * 100);
+              $("loadingText").textContent = "Reading image... " + pct + "%";
+            }
+          },
+        });
+
+        return result.data.text.trim();
+      }
+
+      /* ---------- SUMMARIZATION ---------- */
+
+      /*
+   This is an extractive browser-based summarizer.
+   It does not pretend to be a remote AI model.
+   Later, an actual AI API can be connected behind the same button.
 */
 
-var duplicate=
-list.some(function(item){
-
-return item.type===
-result.type&&
-item.original===
-original&&
-item.summary===
-result.summary;
-
-});
-
-
-if(duplicate){
-
-return;
-
-}
-
-
-list.unshift({
-
-id:
-String(
-Date.now()
-),
-
-type:
-result.type,
-
-name:
-result.name,
-
-original:
-original,
-
-summary:
-result.summary,
-
-points:
-result.points,
-
-keywords:
-result.keywords,
-
-createdAt:
-result.createdAt
-
-});
-
-
-try{
-
-localStorage.setItem(
-"siftra_history",
-JSON.stringify(
-list.slice(0,100)
-)
-);
-
-}catch(error){
-
-notify(
-"Browser storage is full."
-);
-
-}
-
-}
-
-
-/* ---------- RENDER HISTORY ---------- */
-
-function renderHistory(){
-
-var query=
-$("historySearch")
-.value
-.toLowerCase()
-.trim();
-
-
-var list=
-getHistory()
-.filter(function(item){
-
-return(
-(item.name||"")
-.toLowerCase()
-.indexOf(query)>=0
-||
-(item.summary||"")
-.toLowerCase()
-.indexOf(query)>=0
-);
-
-});
-
-
-$("historyList").innerHTML="";
-
-
-if(!list.length){
-
-$("historyList").innerHTML=
-'<div class="empty">No saved summaries yet.</div>';
-
-return;
-
-}
-
-
-list.forEach(
-function(item){
-
-var div=
-document.createElement("div");
-
-div.className="history";
-
-
-var left=
-document.createElement("div");
-
-
-var title=
-document.createElement("b");
-
-title.textContent=
-item.name||
-"Untitled";
-
-
-var meta=
-document.createElement("div");
-
-meta.className="meta";
-
-meta.textContent=
-(item.type||"TEXT").toUpperCase()+
-" • "+
-new Date(
-item.createdAt
-).toLocaleString();
-
-
-left.appendChild(title);
-
-left.appendChild(meta);
-
-
-var actions=
-document.createElement("div");
-
-
-var open=
-document.createElement("button");
-
-open.className="ghost";
-
-open.type="button";
-
-open.textContent="Open";
-
-
-var del=
-document.createElement("button");
-
-del.className="ghost";
-
-del.type="button";
-
-del.textContent="Delete";
-
-
-actions.appendChild(open);
-
-actions.appendChild(del);
-
-
-div.appendChild(left);
-
-div.appendChild(actions);
-
-
-open.addEventListener(
-"click",
-function(){
-
-if(!state[item.type]){
-
-notify(
-"This saved workspace is no longer available."
-);
-
-return;
-
-}
-
-
-state[item.type]={
-
-text:item.original,
-
-name:item.name,
-
-result:{
-
-summary:item.summary,
-
-points:
-item.points||[],
-
-keywords:
-item.keywords||[],
-
-originalWords:
-countWords(
-item.original
-),
-
-summaryWords:
-countWords(
-item.summary
-),
-
-type:item.type,
-
-name:item.name,
-
-createdAt:item.createdAt
-
-}
-
-};
-
-
-currentTab=
-item.type;
-
-
-document.querySelectorAll(
-".tab"
-)
-.forEach(function(button){
-
-button.classList.toggle(
-"active",
-button.getAttribute(
-"data-tab"
-)===currentTab
-);
-
-});
-
-
-document.querySelectorAll(
-".panel"
-)
-.forEach(function(panel){
-
-panel.classList.toggle(
-"hide",
-panel.getAttribute(
-"data-type"
-)!==currentTab
-);
-
-});
-
-
-if(currentTab==="text"){
-
-$("textInput").value=
-item.original;
-
-$("wordCount").textContent=
-countWords(
-item.original
-)+
-" words";
-
-}
-
-
-if(currentTab==="audio"){
-
-$("audioTranscript").value=
-item.original;
-
-}
-
-
-if(currentTab==="video"){
-
-$("videoTranscript").value=
-item.original;
-
-}
-
-
-showPage("app");
-
-showResult();
-
-}
-);
-
-
-del.addEventListener(
-"click",
-function(){
-
-var newList=
-getHistory()
-.filter(function(x){
-
-return x.id!==item.id;
-
-});
-
-
-try{
-
-localStorage.setItem(
-"siftra_history",
-JSON.stringify(
-newList
-)
-);
-
-}catch(error){}
-
-
-renderHistory();
-
-notify(
-"Summary deleted."
-);
-
-}
-);
-
-
-$("historyList")
-.appendChild(div);
-
-}
-);
-
-}
-
-
-/* ---------- HISTORY SEARCH ---------- */
-
-$("historySearch").addEventListener(
-"input",
-renderHistory
-);
-
-
-/* ---------- CLEAR HISTORY ---------- */
-
-$("clearHistory").addEventListener(
-"click",
-function(){
-
-if(!getHistory().length){
-
-notify(
-"History is already empty."
-);
-
-return;
-
-}
-
-
-if(
-confirm(
-"Clear all saved SIFTRA summaries?"
-)
-){
-
-localStorage.removeItem(
-"siftra_history"
-);
-
-renderHistory();
-
-notify(
-"History cleared."
-);
-
-}
-
-});
-
-
-/* ---------- EXPORT HISTORY ---------- */
-
-$("exportHistory").addEventListener(
-"click",
-function(){
-
-var history=
-getHistory();
-
-if(!history.length){
-
-notify(
-"There is no history to export."
-);
-
-return;
-
-}
-
-
-downloadFile(
-
-new Blob(
-[
-JSON.stringify(
-history,
-null,
-2
-)
-],
-{
-type:"application/json"
-}
-),
-
-"siftra-history.json"
-
-);
-
-});
-
-
-/* ---------- START ---------- */
-
-showPage("home");
-
-</script>
-
-</body>
+      const stopWords = new Set(
+        `
+a about above after again against all am an and any are as at be because been before being below between both but by can could did do does doing down during each few for from further had has have having he her here hers herself him himself his how i if in into is it its itself just me more most my myself no nor not now of off on once only or other our ours ourselves out over own same she should so some such than that the their theirs them themselves then there these they this those through to too under until up very was we were what when where which while who whom why will with would you your yours yourself yourselves
+`.split(/\s+/),
+      );
+
+      function tokenize(text) {
+        return text
+          .toLowerCase()
+          .replace(/[^\p{L}\p{N}\s'-]/gu, " ")
+          .split(/\s+/)
+          .filter(Boolean);
+      }
+
+      function splitSentences(text) {
+        return text
+          .replace(/\s+/g, " ")
+          .split(/(?<=[.!?])\s+/)
+          .map((x) => x.trim())
+          .filter((x) => x.length > 20);
+      }
+
+      function summarizeText(text, style) {
+        const clean = text.replace(/\s+/g, " ").trim();
+
+        if (clean.length < 80) {
+          return {
+            summary: clean || "There is not enough text to summarize.",
+            points: clean ? [clean] : [],
+            keywords: [],
+          };
+        }
+
+        const sentences = splitSentences(clean);
+
+        if (!sentences.length) {
+          return {
+            summary: clean.slice(0, 900),
+            points: [clean.slice(0, 220)],
+            keywords: extractKeywords(clean),
+          };
+        }
+
+        const frequencies = {};
+        tokenize(clean).forEach((word) => {
+          if (word.length < 3 || stopWords.has(word)) return;
+          frequencies[word] = (frequencies[word] || 0) + 1;
+        });
+
+        const scored = sentences.map((sentence, index) => {
+          const words = tokenize(sentence);
+          let score = 0;
+
+          words.forEach((word) => {
+            if (frequencies[word]) score += frequencies[word];
+          });
+
+          score = score / Math.max(words.length, 1);
+
+          if (index < Math.ceil(sentences.length * 0.15)) score *= 1.18;
+
+          return { sentence, score, index };
+        });
+
+        const count =
+          style === "brief"
+            ? 3
+            : style === "detailed"
+              ? Math.min(8, Math.ceil(sentences.length * 0.45))
+              : Math.min(5, Math.ceil(sentences.length * 0.28));
+
+        const selected = scored
+          .slice()
+          .sort((a, b) => b.score - a.score)
+          .slice(0, count)
+          .sort((a, b) => a.index - b.index);
+
+        const summary = selected.map((x) => x.sentence).join(" ");
+
+        const points = selected.map((x) => {
+          return x.sentence.length > 220
+            ? x.sentence.slice(0, 217) + "..."
+            : x.sentence;
+        });
+
+        return {
+          summary,
+          points,
+          keywords: extractKeywords(clean),
+        };
+      }
+
+      function extractKeywords(text) {
+        const freq = {};
+
+        tokenize(text).forEach((word) => {
+          if (word.length < 4 || stopWords.has(word)) return;
+          freq[word] = (freq[word] || 0) + 1;
+        });
+
+        return Object.entries(freq)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 10)
+          .map((x) => x[0]);
+      }
+
+      $("summarizeBtn").addEventListener("click", () => {
+        const text = $("sourceText").value.trim();
+
+        if (!text) {
+          notify("Upload a file or paste some text first.");
+          return;
+        }
+
+        setLoading(true, "Generating summary...");
+
+        setTimeout(() => {
+          try {
+            const style = $("summaryStyle").value;
+            const result = summarizeText(text, style);
+
+            currentSourceText = text;
+            currentResult = {
+              name: selectedFile?.name || "Text summary",
+              type: selectedFile?.type || "text",
+              summary: result.summary,
+              points: result.points,
+              keywords: result.keywords,
+            };
+
+            renderResult(currentResult);
+            notify("Summary generated.");
+          } catch (error) {
+            console.error(error);
+            notify("Could not generate the summary.");
+          } finally {
+            setLoading(false);
+          }
+        }, 350);
+      });
+
+      function renderResult(result) {
+        $("resultMeta").textContent =
+          result.name + " • " + new Date().toLocaleString();
+
+        $("output").textContent = result.summary || "No summary generated.";
+
+        $("keyPoints").innerHTML = result.points.length
+          ? result.points
+              .map((x) => `<span class="pill">${escapeHtml(x)}</span>`)
+              .join("")
+          : '<span class="muted">—</span>';
+
+        $("keywords").innerHTML = result.keywords.length
+          ? result.keywords
+              .map((x) => `<span class="pill">${escapeHtml(x)}</span>`)
+              .join("")
+          : '<span class="muted">—</span>';
+      }
+
+      /* ---------- CLOUD HISTORY ---------- */
+
+      async function saveHistory() {
+        if (!currentUser) {
+          notify("Please sign in first.");
+          return;
+        }
+
+        if (!currentResult) {
+          notify("Generate a summary first.");
+          return;
+        }
+
+        if (!supabaseClient) {
+          notify("Supabase is not connected.");
+          return;
+        }
+
+        setLoading(true, "Saving summary...");
+
+        try {
+          const { error } = await supabaseClient.from("summaries").insert({
+            user_id: currentUser.id,
+            name: currentResult.name,
+            type: currentResult.type,
+            original: currentSourceText,
+            summary: currentResult.summary,
+            points: currentResult.points,
+            keywords: currentResult.keywords,
+          });
+
+          if (error) throw error;
+
+          notify("Summary saved to your history.");
+        } catch (error) {
+          console.error(error);
+          notify("Could not save summary: " + friendlyError(error));
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      $("saveSummaryBtn").addEventListener("click", saveHistory);
+
+      async function loadHistory() {
+        const container = $("historyList");
+
+        if (!currentUser) {
+          container.innerHTML =
+            '<div class="empty">Please sign in to view history.</div>';
+          return;
+        }
+
+        if (!supabaseClient) {
+          container.innerHTML =
+            '<div class="empty">Connect Supabase to use cloud history.</div>';
+          return;
+        }
+
+        container.innerHTML =
+          '<div class="empty">Loading your history...</div>';
+
+        const { data, error } = await supabaseClient
+          .from("summaries")
+          .select("*")
+          .eq("user_id", currentUser.id)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error(error);
+          container.innerHTML =
+            '<div class="empty">Could not load history.</div>';
+          return;
+        }
+
+        if (!data?.length) {
+          container.innerHTML =
+            '<div class="empty">No saved summaries yet. Generate one in your workspace.</div>';
+          return;
+        }
+
+        container.innerHTML = data
+          .map(
+            (item) => `
+        <article class="history-item">
+            <div>
+                <h3>${escapeHtml(item.name || "Untitled summary")}</h3>
+                <p>${new Date(item.created_at).toLocaleString()} • ${escapeHtml(item.type || "text")}</p>
+            </div>
+            <div class="history-actions">
+                <button class="small-btn" type="button" onclick="openHistoryItem('${item.id}')">Open</button>
+                <button class="small-btn danger" type="button" onclick="deleteHistoryItem('${item.id}')">Delete</button>
+            </div>
+        </article>
+    `,
+          )
+          .join("");
+      }
+
+      window.openHistoryItem = async function (id) {
+        if (!supabaseClient || !currentUser) return;
+
+        const { data, error } = await supabaseClient
+          .from("summaries")
+          .select("*")
+          .eq("id", id)
+          .eq("user_id", currentUser.id)
+          .single();
+
+        if (error) {
+          console.error(error);
+          notify("Could not open summary.");
+          return;
+        }
+
+        currentSourceText = data.original || "";
+        currentResult = {
+          name: data.name || "Saved summary",
+          type: data.type || "text",
+          summary: data.summary || "",
+          points: Array.isArray(data.points) ? data.points : [],
+          keywords: Array.isArray(data.keywords) ? data.keywords : [],
+        };
+
+        $("sourceText").value = currentSourceText;
+        renderResult(currentResult);
+        showApp("dashboard");
+        notify("Saved summary opened.");
+      };
+
+      window.deleteHistoryItem = async function (id) {
+        if (!supabaseClient || !currentUser) return;
+
+        const confirmed = confirm("Delete this saved summary?");
+        if (!confirmed) return;
+
+        const { error } = await supabaseClient
+          .from("summaries")
+          .delete()
+          .eq("id", id)
+          .eq("user_id", currentUser.id);
+
+        if (error) {
+          console.error(error);
+          notify("Could not delete summary.");
+          return;
+        }
+
+        notify("Summary deleted.");
+        loadHistory();
+      };
+
+      $("refreshHistory").addEventListener("click", loadHistory);
+
+      /* ---------- PROFILE ---------- */
+
+      async function loadProfile() {
+        updateLoggedInUserUI();
+
+        if (!supabaseClient || !currentUser) return;
+
+        const { data, error } = await supabaseClient
+          .from("profiles")
+          .select("*")
+          .eq("id", currentUser.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error(error);
+          return;
+        }
+
+        if (data) {
+          $("profileName").textContent =
+            data.full_name || currentUser.user_metadata?.full_name || "—";
+          $("profileEmail").textContent =
+            data.email || currentUser.email || "—";
+        }
+      }
+
+      /* ---------- EXPORT ---------- */
+
+      function getExportText() {
+        if (!currentResult) return "";
+
+        return [
+          "SIFTRA SUMMARY",
+          "==============================",
+          "",
+          "Source: " + currentResult.name,
+          "Created: " + new Date().toLocaleString(),
+          "",
+          "SUMMARY",
+          "-------",
+          currentResult.summary,
+          "",
+          "KEY POINTS",
+          "----------",
+          ...currentResult.points.map((x, i) => i + 1 + ". " + x),
+          "",
+          "KEYWORDS",
+          "--------",
+          currentResult.keywords.join(", "),
+        ].join("\n");
+      }
+
+      $("downloadTxtBtn").addEventListener("click", () => {
+        if (!currentResult) {
+          notify("Generate a summary first.");
+          return;
+        }
+
+        const blob = new Blob([getExportText()], {
+          type: "text/plain;charset=utf-8",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+
+        a.href = url;
+        a.download = "siftra-summary.txt";
+        a.click();
+
+        URL.revokeObjectURL(url);
+      });
+
+      $("downloadPdfBtn").addEventListener("click", () => {
+        if (!currentResult) {
+          notify("Generate a summary first.");
+          return;
+        }
+
+        if (!window.jspdf) {
+          notify("PDF export library is not available.");
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        const lines = doc.splitTextToSize(getExportText(), 175);
+
+        doc.setFontSize(11);
+        doc.text(lines, 18, 20);
+        doc.save("siftra-summary.pdf");
+      });
+
+      /* ---------- INITIALIZE ---------- */
+
+      initializeAuthentication();
+    </script>
+  </body>
 </html>
